@@ -1,0 +1,47 @@
+---
+title: "getting_the_data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{getting_the_data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library("edjnetquotefinder")
+library("rtweet")
+library("dplyr")
+
+twitter_token <- readRDS(file = "twitter_token.rds")
+```
+
+# Define the sources
+
+## A list of users
+
+A possible approach is to extract a list of users from a list that a Twitter user has created on Twitter. 
+
+The official account of the European Parliament has [a list with all MEPs who are on Twitter](https://twitter.com/Europarl_EN/lists/all-meps-on-twitter/members). This can be extracted with the following command:
+
+```{r}
+mep_list <- rtweet::lists_members(slug = "all-meps-on-twitter",
+                                  owner_user = "Europarl_EN",
+                                  token = twitter_token)
+
+mep_list %>%
+  arrange(desc(followers_count))
+```
+
+```{r}
+qf_extract_tweets_by_user(users = mep_list$screen_name %>% head(20),
+                          twitter_token = twitter_token)
+
+```
+

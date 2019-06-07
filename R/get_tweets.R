@@ -1,0 +1,91 @@
+#' Extracts and stores tweets locally
+#'
+#' @param users A character vector of handles or id of Twitter users.
+#' @param wait An integer, defaults to 1. Seconds to wait between requests to Twitter.
+#' @examples
+#' 
+#' @export
+
+qf_extract_tweets_by_user <- function(users,
+                              wait = 1,
+                              twitter_token) {
+  
+  fs::dir_create(path = "tweets_by_user")
+  
+  local_tweet_locations <- fs::dir_ls(path = "tweets_by_user",
+                                      recurse = FALSE,
+                                      type = "file",
+                                      glob = "*.rds")
+  
+  if (length(local_tweet_locations)==0) {
+    existing_users <- NA
+    new_users <- users
+  } else {
+    existing_users <- stringr::str_remove(string = fs::path_file(path = local_tweet_locations),
+                                          pattern = stringr::fixed(".rds"))
+    new_users <- users[is.element(el = users, set = existing_users)==FALSE]
+  }
+
+  new_tweets <- tibble::data_frame(users = new_users, new_tweets = NA)
+  
+  for (i in seq_along(new_users)) { 
+    temp <- tryCatch(expr = rtweet::get_timeline(user = new_users[i],
+                                                 n = 3200,
+                                                 token = twitter_token),
+                     error = function(e) {
+                       update_tweets$newTweets[i] <- NA
+                       NULL
+                     })
+    # if Twitter throws back anything looking real, add it to stored file
+    if (is.null(temp)==FALSE) {
+      if (nrow(temp)>0) {
+        if (is.na(temp$screen_name[1])==FALSE){
+          saveRDS(object = temp, file = fs::path("tweets_by_user", paste0(new_users[i], ".rds")))
+          # store how many new tweets in data frame for reference
+          new_tweets$new_tweets[i] <- nrow(temp)
+          message(paste(new_tweets[i,], collapse = " - "))
+          Sys.sleep(time = wait)
+        }
+      }
+    }
+  }
+  # now process pre-existing users
+  if (is.na(existing_users[1])==FALSE) {
+    
+    update_tweets <- tibble::tibble(users = existing_users,
+                                    new_tweets = NA)
+    
+    for (i in seq_along(existing_users)) {  # start processing by oldest modified
+      stored <- readRDS(file = fs::path("tweets_by_user", paste0(existing_users[i], ".rds")))
+      if (is.null(stored)==FALSE) { # 
+        # if there's an error, print it but go ahead
+        temp <- tryCatch(expr = rtweet::get_timeline(user = existing_users[i],
+                                                     n = 3200,
+                                                     min_id = max(stored$status_id),
+                                                     token = twitter_token),
+                         error = function(e) {
+                           # do nothing
+                         })
+        # if Twitter throws back anything looking real, add it to stored file
+        if (is.null(temp)==FALSE) {
+          if (nrow(temp)>0) {
+            if (is.na(temp$screen_name[1])==FALSE){
+              pre_save <- dplyr::bind_rows(temp, stored) %>%
+                dplyr::distinct(status_id, .keep_all = TRUE) %>%
+                dplyr::arrange(created_at)
+              saveRDS(object = pre_save,file = fs::path("tweets_by_user", paste0(existing_users[i], ".rds")))
+              # store how many new tweets in data frame for reference
+              update_tweets$new_tweets[i] <- nrow(pre_save)-nrow(stored)
+              message(paste(paste(update_tweets[i,], collapse = " - "), "new tweets"))
+              Sys.sleep(time = wait)
+            }
+          }
+        }
+      }
+    }
+    new_tweets <- dplyr::bind_rows(new_tweets, update_tweets)
+  }
+  
+  # report back what has been downloaded
+  new_tweets
+}
