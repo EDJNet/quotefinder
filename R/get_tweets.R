@@ -6,9 +6,9 @@
 #' 
 #' @export
 
-qf_extract_tweets_by_user <- function(users,
-                              wait = 1,
-                              twitter_token) {
+qf_get_tweets_by_user <- function(users,
+                                  wait = 1,
+                                  twitter_token) {
   
   fs::dir_create(path = "tweets_by_user")
   
@@ -24,9 +24,10 @@ qf_extract_tweets_by_user <- function(users,
     existing_users <- stringr::str_remove(string = fs::path_file(path = local_tweet_locations),
                                           pattern = stringr::fixed(".rds"))
     new_users <- users[is.element(el = users, set = existing_users)==FALSE]
+    preexisting_users <- users[is.element(el = users, set = existing_users)==TRUE]
   }
 
-  new_tweets <- tibble::data_frame(users = new_users, new_tweets = NA)
+  new_tweets <- tibble::tibble(users = new_users, new_tweets = NA)
   
   for (i in seq_along(new_users)) { 
     temp <- tryCatch(expr = rtweet::get_timeline(user = new_users[i],
@@ -52,16 +53,17 @@ qf_extract_tweets_by_user <- function(users,
   # now process pre-existing users
   if (is.na(existing_users[1])==FALSE) {
     
-    update_tweets <- tibble::tibble(users = existing_users,
+    update_tweets <- tibble::tibble(users = preexisting_users,
                                     new_tweets = NA)
     
-    for (i in seq_along(existing_users)) {  # start processing by oldest modified
-      stored <- readRDS(file = fs::path("tweets_by_user", paste0(existing_users[i], ".rds")))
+    for (i in seq_along(preexisting_users)) {  # start processing by oldest modified
+      stored <- readRDS(file = fs::path("tweets_by_user",
+                                        paste0(preexisting_users[i], ".rds")))
       if (is.null(stored)==FALSE) { # 
         # if there's an error, print it but go ahead
-        temp <- tryCatch(expr = rtweet::get_timeline(user = existing_users[i],
+        temp <- tryCatch(expr = rtweet::get_timeline(user = preexisting_users[i],
                                                      n = 3200,
-                                                     min_id = max(stored$status_id),
+                                                     since_id = sum(as.numeric(max(stored$status_id)), 1),
                                                      token = twitter_token),
                          error = function(e) {
                            # do nothing
@@ -73,7 +75,7 @@ qf_extract_tweets_by_user <- function(users,
               pre_save <- dplyr::bind_rows(temp, stored) %>%
                 dplyr::distinct(status_id, .keep_all = TRUE) %>%
                 dplyr::arrange(created_at)
-              saveRDS(object = pre_save,file = fs::path("tweets_by_user", paste0(existing_users[i], ".rds")))
+              saveRDS(object = pre_save,file = fs::path("tweets_by_user", paste0(preexisting_users[i], ".rds")))
               # store how many new tweets in data frame for reference
               update_tweets$new_tweets[i] <- nrow(pre_save)-nrow(stored)
               message(paste(paste(update_tweets[i,], collapse = " - "), "new tweets"))

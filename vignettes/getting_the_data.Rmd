@@ -31,17 +31,31 @@ A possible approach is to extract a list of users from a list that a Twitter use
 The official account of the European Parliament has [a list with all MEPs who are on Twitter](https://twitter.com/Europarl_EN/lists/all-meps-on-twitter/members). This can be extracted with the following command:
 
 ```{r}
-mep_list <- rtweet::lists_members(slug = "all-meps-on-twitter",
+
+if (fs::file_exists("mep_df.rds")==FALSE) {
+  mep_df <- rtweet::lists_members(slug = "all-meps-on-twitter",
                                   owner_user = "Europarl_EN",
                                   token = twitter_token)
+} else {
+  mep_df <- readRDS(file = "mep_df.rds")
+}
 
-mep_list %>%
+
+mep_df %>%
   arrange(desc(followers_count))
 ```
 
-```{r}
-qf_extract_tweets_by_user(users = mep_list$screen_name %>% head(20),
-                          twitter_token = twitter_token)
+The following command will download all available tweets for the given users. If they have been previously downloaded, it will download only newer tweets. 
 
+```{r}
+qf_get_tweets_by_user(users = mep_df$screen_name,
+                      twitter_token = twitter_token)
+
+```
+
+
+```{r eval = FALSE}
+getting_tweets <- callr::r_bg(func = qf_get_tweets_by_user, args = list(users = mep_df$screen_name,
+                                                      twitter_token = twitter_token))
 ```
 
