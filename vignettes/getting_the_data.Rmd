@@ -36,6 +36,7 @@ if (fs::file_exists("mep_df.rds")==FALSE) {
   mep_df <- rtweet::lists_members(slug = "all-meps-on-twitter",
                                   owner_user = "Europarl_EN",
                                   token = twitter_token)
+  saveRDS(object = mep_df, file = "mep_df")
 } else {
   mep_df <- readRDS(file = "mep_df.rds")
 }
@@ -47,24 +48,29 @@ mep_df %>%
 
 The following command will download all available tweets for the given users. If they have been previously downloaded, it will download only newer tweets. 
 
-```{r}
+```{r getting_tweets}
 qf_get_tweets_by_user(users = sample(mep_df$screen_name),
                       twitter_token = twitter_token,
-                      wait = 1)
+                      wait = 2)
 
 ```
 
 
 ```{r eval = FALSE}
-getting_tweets <- callr::r_bg(func = qf_get_tweets_by_user, args = list(users = mep_df$screen_name,
-                                                      twitter_token = twitter_token))
+
+rtweet::rate_limit(token = twitter_token, query = "get_timeline")
+
+
+getting_tweets <- callr::r_bg(func = qf_get_tweets_by_user,
+                              args = list(users = mep_df$screen_name,
+                                          twitter_token = twitter_token))
 ```
 
 Tweets are stored in a subfolder, `tweets_by_user`. 
 
 It is possible to load them in a single data frame with the following command, which facilitates also filtering by date. By default, the resulting data frame of tweets is stored in `tweets_all/tweets_all.rds`.
 
-```{r}
+```{r saving_tweets}
 tweets_all <- qf_bind_rows_tweets(users = mep_df$screen_name,
                                   since = Sys.Date()-31,
                                   save = TRUE)
