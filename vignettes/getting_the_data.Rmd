@@ -48,10 +48,13 @@ mep_df %>%
 The following command will download all available tweets for the given users. If they have been previously downloaded, it will download only newer tweets. 
 
 ```{r}
-qf_get_tweets_by_user(users = mep_df$screen_name,
-                      twitter_token = twitter_token)
+qf_get_tweets_by_user(users = sample(mep_df$screen_name),
+                      twitter_token = twitter_token,
+                      wait = 0)
 
 ```
+
+
 
 
 ```{r eval = FALSE}
