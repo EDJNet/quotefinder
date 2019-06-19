@@ -50,15 +50,24 @@ The following command will download all available tweets for the given users. If
 ```{r}
 qf_get_tweets_by_user(users = sample(mep_df$screen_name),
                       twitter_token = twitter_token,
-                      wait = 0)
+                      wait = 1)
 
 ```
-
-
 
 
 ```{r eval = FALSE}
 getting_tweets <- callr::r_bg(func = qf_get_tweets_by_user, args = list(users = mep_df$screen_name,
                                                       twitter_token = twitter_token))
 ```
+
+Tweets are stored in a subfolder, `tweets_by_user`. 
+
+It is possible to load them in a single data frame with the following command, which facilitates also filtering by date. By default, the resulting data frame of tweets is stored in `tweets_all/tweets_all.rds`.
+
+```{r}
+tweets_all <- qf_bind_rows_tweets(users = mep_df$screen_name,
+                                  since = Sys.Date()-31,
+                                  save = TRUE)
+```
+
 

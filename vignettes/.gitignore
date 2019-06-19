@@ -2,3 +2,4 @@
 *.R
 twitter_token.rds
 tweets_by_user
+tweets_all

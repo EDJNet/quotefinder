@@ -4,10 +4,14 @@
 \alias{qf_bind_rows_tweets}
 \title{Create a single data frame from a vector of Twitter handles}
 \usage{
-qf_bind_rows_tweets(users)
+qf_bind_rows_tweets(users, since = NULL, save = TRUE)
 }
 \arguments{
 \item{users}{A character vector of handles or id of Twitter users.}
+
+\item{since}{A date, expressed in the form Y-M-D (e.g. "2018-12-31")}
+
+\item{save}{Logical, defaults to TRUE. If TRUE, the merged data frame is stored in the following location: `tweets_all/tweets.all.rds`}
 }
 \description{
 Create a single data frame from a vector of Twitter handles
