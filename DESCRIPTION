@@ -11,7 +11,9 @@ Imports:
     dplyr,
     rtweet,
     stringr,
-    fs
+    fs,
+    DT,
+    glue
 RoxygenNote: 6.1.1
 URL: https://github.com/giocomai/edjnetquotefinder
 BugReports: https://github.com/giocomai/edjnetquotefinder/issues

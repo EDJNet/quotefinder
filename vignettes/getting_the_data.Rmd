@@ -76,4 +76,9 @@ tweets_all <- qf_bind_rows_tweets(users = mep_df$screen_name,
                                   save = TRUE)
 ```
 
+```{r}
+tweets_all %>% 
+  filter(is_retweet==FALSE) %>% 
+  saveRDS(file = fs::path("tweets_all", "tweets_all_no_rt.rds"))
+```
 
