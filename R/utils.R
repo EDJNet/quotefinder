@@ -18,9 +18,9 @@ qf_find_list_id <- function(slug,
     fs::dir_create(path = "lists_by_user")
     cached_list_location <- fs::path("lists_by_user", paste0(owner_user, ".rds"))
     if (fs::file_exists(cached_list_location)==TRUE) {
-      list_users <- readRDS(file = cached_list_location)
+      rtweet::list_users <- readRDS(file = cached_list_location)
     } else {
-      list_users <- lists_users(user = owner_user,
+      rtweet::list_users <- lists_users(user = owner_user,
                                 reverse = TRUE,
                                 token = NULL,
                                 parse = TRUE)
