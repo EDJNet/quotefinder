@@ -90,7 +90,6 @@ qf_get_tweets_by_user <- function(users,
     }
     new_tweets <- dplyr::bind_rows(new_tweets, update_tweets)
   }
-  
   # report back what has been downloaded
   new_tweets
 }
@@ -113,27 +112,15 @@ qf_get_tweets_from_list <- function(list_id = NULL,
                                     n = 200,
                                     include_rts = TRUE,
                                     parse = TRUE,
-                                    twitter_token = NULL, 
                                     cache_lists = TRUE,
-                                    overwrite_lists = FALSE) {
+                                    overwrite_lists = FALSE,
+                                    twitter_token = NULL) {
   if (is.null(list_id)==TRUE) {
-    if (cache_lists == TRUE) {
-      fs::dir_create(path = "lists_by_user")
-      cached_list_location <- fs::path("lists_by_user", paste0(owner_user, ".rds"))
-      if (fs::file_exists(cached_list_location)==TRUE) {
-        list_users <- readRDS(file = cached_list_location)
-      } else {
-        list_users <- lists_users(user = owner_user,
-                                  reverse = TRUE,
-                                  token = NULL,
-                                  parse = TRUE)
-        saveRDS(object = list_users, file = cached_list_location)
-      }
-    }
-    list_id <- list_users %>% 
-      dplyr::rename(slug_l = slug) %>% 
-      dplyr::filter(slug_l == slug) %>% 
-      dplyr::pull(list_id)
+    list_id <- qf_find_list_id(slug = slug,
+                    owner_user = owner_user,
+                    cache_lists = cache_lists,
+                    overwrite_lists = overwrite_lists,
+                    twitter_token = twitter_token)
   }
   fs::dir_create(path = fs::path("tweets_from_list", list_id), recurse = TRUE)
   local_tweets_location <- fs::dir_ls(path = fs::path("tweets_from_list", list_id),
