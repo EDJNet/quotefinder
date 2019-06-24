@@ -29,7 +29,7 @@ qf_get_tweets_by_user <- function(users,
     new_users <- users[is.element(el = users, set = existing_users)==FALSE]
     preexisting_users <- users[is.element(el = users, set = existing_users)==TRUE]
   }
-
+  
   new_tweets <- tibble::tibble(users = new_users, new_tweets = NA)
   
   for (i in seq_along(new_users)) { 
@@ -90,12 +90,12 @@ qf_get_tweets_by_user <- function(users,
     }
     new_tweets <- dplyr::bind_rows(new_tweets, update_tweets)
   }
-  
   # report back what has been downloaded
   new_tweets
 }
 
 #' Extracts and stores tweets locally
+#' Extracts and stores tweets locally based on Twitter lists
 #'
 #' @param n An integer, number of new tweets to request per users, defaults to 200.
 #' @param cache_lists Logical, defaults to TRUE. If TRUE, stores locally the lists owned by a given user, in a subfolder `lists_by_user`. If list has already been downloaded, it just loads it. To overwrite, set `overwrite` to TRUE.
@@ -143,18 +143,36 @@ qf_get_tweets_from_list <- function(list_id = NULL,
   if (length(local_tweets_location)==0) {
     today_folder <- fs::path("tweets_from_list", list_id, Sys.Date())
     fs::dir_create(path = today_folder, recurse = TRUE)
-    tweet_from_list <- rtweet::lists_statuses(list_id = list_id,
-                                          n = n,
-                                          include_rts = include_rts,
-                                          parse = parse,
-                                          token = twitter_token)
-    saveRDS(object = tweet_from_list,
-            file = fs::path(today_folder, paste0(Sys.time(), "-", "list_id.rds")))
+    tweets_from_list <- rtweet::lists_statuses(list_id = list_id,
+                                               n = n,
+                                               include_rts = include_rts,
+                                               since_id = since_id,
+                                               parse = parse,
+                                               token = twitter_token)
+    saveRDS(object = tweets_from_list,
+            file = fs::path(today_folder,
+                            paste0(Sys.time(), "-", "list_id.rds")))
   } else {
     previous_tweets <- readRDS(file = local_tweets_location %>% tail(1))
+    if (is.null(since_id)==TRUE) {
+      tweets_from_list <- rtweet::lists_statuses(list_id = list_id,
+                                                 n = n,
+                                                 since_id = max(as.numeric(previous_tweets$status_id)),
+                                                 include_rts = include_rts,
+                                                 parse = parse,
+                                                 token = twitter_token)
+    } else {
+      tweets_from_list <- rtweet::lists_statuses(list_id = list_id,
+                                                 n = n,
+                                                 since_id = max(as.numeric(previous_tweets$status_id)),
+                                                 include_rts = include_rts,
+                                                 parse = parse,
+                                                 token = twitter_token)
+    }
     
+    saveRDS(object = tweets_from_list,
+            file = fs::path(today_folder,
+                            paste0(Sys.time(), "-", "list_id.rds")))
   }
-  
-  
-  
+  return(tweets_from_list)
 }

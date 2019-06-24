@@ -22,9 +22,7 @@ library("dplyr")
 twitter_token <- readRDS(file = "twitter_token.rds")
 ```
 
-# Define the sources
-
-## A list of users
+## Getting tweets by user
 
 A possible approach is to extract a list of users from a list that a Twitter user has created on Twitter. 
 
@@ -82,6 +80,7 @@ tweets_all %>%
   saveRDS(file = fs::path("tweets_all", "tweets_all_no_rt.rds"))
 ```
 
+<<<<<<< HEAD
 
 ```{r}
 ep_parliament_lists <- lists_users(user = "europarl_en", reverse = TRUE, token = NULL, parse = TRUE)
@@ -90,3 +89,16 @@ slug = "all-meps-on-twitter"
 
 ```
 
+=======
+## Getting tweets from lists
+
+```{r}
+qf_get_tweets_from_list(slug = "all-meps-on-twitter",
+                        owner_user = "europarl_en",
+                        n = 3200,
+                        include_rts = FALSE,
+                        twitter_token = twitter_token)
+```
+
+
+>>>>>>> 192a1c133b1aad680a2fad95327c58ce1bbd5599
