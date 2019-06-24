@@ -82,3 +82,11 @@ tweets_all %>%
   saveRDS(file = fs::path("tweets_all", "tweets_all_no_rt.rds"))
 ```
 
+
+```{r}
+ep_parliament_lists <- lists_users(user = "europarl_en", reverse = TRUE, token = NULL, parse = TRUE)
+
+slug = "all-meps-on-twitter"
+
+```
+
