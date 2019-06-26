@@ -4,10 +4,11 @@
 \alias{qf_get_tweets_by_user}
 \title{Extracts and stores tweets locally}
 \usage{
-qf_get_tweets_by_user(users, wait = 1, n = 100, twitter_token = NULL)
+qf_get_tweets_by_user(users, wait = 1, n = 100, cache_id = TRUE,
+  twitter_token = NULL)
 }
 \arguments{
-\item{users}{A character vector of handles or id of Twitter users.}
+\item{users}{A character vector of handles or id of Twitter users. Twitter users should ideally be provided in the form of user ids. If screen names are given, they will be converted to Twitter ids. In the rare case when a user screen name is made exclusively by numbers, provide users as lists using rtweet::as_screenname. See `?rtweet::as_screenname` for details.}
 
 \item{wait}{An integer, defaults to 1. Seconds to wait between requests to Twitter.}
 

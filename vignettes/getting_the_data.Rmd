@@ -10,7 +10,8 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = FALSE
 )
 ```
 
@@ -47,7 +48,7 @@ mep_df %>%
 The following command will download all available tweets for the given users. If they have been previously downloaded, it will download only newer tweets. 
 
 ```{r getting_tweets}
-qf_get_tweets_by_user(users = sample(mep_df$screen_name),
+qf_get_tweets_by_user(users = sample(x = mep_df$screen_name, size = 10, replace = FALSE),
                       twitter_token = twitter_token,
                       wait = 2)
 
@@ -80,7 +81,6 @@ tweets_all %>%
   saveRDS(file = fs::path("tweets_all", "tweets_all_no_rt.rds"))
 ```
 
-<<<<<<< HEAD
 
 ```{r}
 ep_parliament_lists <- lists_users(user = "europarl_en", reverse = TRUE, token = NULL, parse = TRUE)
@@ -89,7 +89,7 @@ slug = "all-meps-on-twitter"
 
 ```
 
-=======
+
 ## Getting tweets from lists
 
 ```{r}
@@ -101,4 +101,3 @@ qf_get_tweets_from_list(slug = "all-meps-on-twitter",
 ```
 
 
->>>>>>> 192a1c133b1aad680a2fad95327c58ce1bbd5599
