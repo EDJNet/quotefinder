@@ -12,6 +12,7 @@
 qf_bind_rows_tweets <- function(users = NULL,
                                 lists = NULL,
                                 since = Sys.Date()-31, 
+                                include_rts = FALSE,
                                 save = TRUE,
                                 twitter_token = NULL) {
   
@@ -82,7 +83,8 @@ qf_bind_rows_tweets <- function(users = NULL,
   
   tweets_all <- dplyr::bind_rows(tweets_from_lists,
                                  tweets_all_users) %>% 
-    dplyr::distinct(status_id)
+    dplyr::distinct(status_id) %>% 
+    dplyr::filter(is_retweet == include_rts | is_retweet == FALSE)
   
   if (save==TRUE) {
     fs::dir_create(path = "tweets_all")
