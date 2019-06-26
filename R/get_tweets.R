@@ -147,7 +147,8 @@ qf_get_tweets_from_list <- function(list_id = NULL,
                                                include_rts = include_rts,
                                                since_id = since_id,
                                                parse = parse,
-                                               token = twitter_token)
+                                               token = twitter_token) %>% 
+      dplyr::arrange(created_at)
     saveRDS(object = tweets_from_list,
             file = fs::path(today_folder,
                             paste0(Sys.time(), "-", "list_id.rds")))
@@ -159,14 +160,16 @@ qf_get_tweets_from_list <- function(list_id = NULL,
                                                  since_id = max(as.numeric(previous_tweets$status_id)),
                                                  include_rts = include_rts,
                                                  parse = parse,
-                                                 token = twitter_token)
+                                                 token = twitter_token) %>% 
+        dplyr::arrange(created_at)
     } else {
       tweets_from_list <- rtweet::lists_statuses(list_id = list_id,
                                                  n = n,
                                                  since_id = max(as.numeric(previous_tweets$status_id)),
                                                  include_rts = include_rts,
                                                  parse = parse,
-                                                 token = twitter_token)
+                                                 token = twitter_token) %>% 
+        dplyr::arrange(created_at)
     }
     
     saveRDS(object = tweets_from_list,
