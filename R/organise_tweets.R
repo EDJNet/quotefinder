@@ -81,7 +81,8 @@ qf_bind_rows_tweets <- function(users = NULL,
   }
   
   tweets_all <- dplyr::bind_rows(tweets_from_lists,
-                                 tweets_all_users)
+                                 tweets_all_users) %>% 
+    dplyr::distinct(status_id)
   
   if (save==TRUE) {
     fs::dir_create(path = "tweets_all")
