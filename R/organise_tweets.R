@@ -31,60 +31,63 @@ qf_bind_rows_tweets <- function(users = NULL,
     tweets_from_lists <- purrr::map_dfr(.x = lists, .f = function(x) {
       available_folders <- fs::dir_ls(path = fs::path("tweets_from_list", x))
       folders_filter_l <- as.Date(fs::path_file(path = available_folders))>since
-      fs::dir_ls(path = available_folders[folders_filter_l],
-                 recurse = FALSE,
-                 type = "file",
-                 glob = "*.rds")
-      # TODO
-    })
-    
-    
-    
-      fs::path_file()
-    
-  }
-  
-  
-  available_users_location <- fs::dir_ls(path = fs::path("tweets_by_user"),
-                                         recurse = FALSE, 
-                                         type = "file", 
+      list_files_locations <- fs::dir_ls(path = available_folders[folders_filter_l],
+                                         recurse = FALSE,
+                                         type = "file",
                                          glob = "*.rds")
-  
-  available_users <- fs::path_file(path = available_users_location) %>% 
-    fs::path_ext_remove()
-  
- 
-  missing_users <- users[!is.element(el = users, set = available_users)]
-  
-  if (length(missing_users)>0) {
-    warning(paste0("There is no locally stored file with tweets by the following users:\n",
-                   paste(missing_users, collapse = ", "), "\n"))  
-  }
-  
-  existing_users_location <- fs::path("tweets_by_user",
-                             paste0(users[is.element(el = users, set = available_users)], ".rds"))
-  
-  pb <- dplyr::progress_estimated(length(existing_users_location))
-  
-  if (is.null(date)) {
-    tweets_all <- purrr::map_dfr(.x = existing_users_location,
-                                .f = function(x) {
-                                  pb$tick()$print()
-                                  readRDS(x)
-                                })
+      purrr::map_dfr(.x = list_files_locations,
+                     .f = readRDS)
+    })
   } else {
-    tweets_all <- purrr::map_dfr(.x = existing_users_location,
-                                .f = function(x) {
-                                  pb$tick()$print()
-                                  readRDS(x) %>% 
-                                    filter(created_at>as.POSIXct(as.Date(since)))
-                                })
+    tweets_from_lists <- NULL
   }
+  
+  if (is.null(users)==FALSE) {
+    available_users_location <- fs::dir_ls(path = fs::path("tweets_by_user"),
+                                           recurse = FALSE, 
+                                           type = "file", 
+                                           glob = "*.rds")
+    
+    available_users <- fs::path_file(path = available_users_location) %>% 
+      fs::path_ext_remove()
+    
+    
+    missing_users <- users[!is.element(el = users, set = available_users)]
+    
+    if (length(missing_users)>0) {
+      warning(paste0("There is no locally stored file with tweets by the following users:\n",
+                     paste(missing_users, collapse = ", "), "\n"))  
+    }
+    
+    existing_users_location <- fs::path("tweets_by_user",
+                                        paste0(users[is.element(el = users, set = available_users)], ".rds"))
+    
+    
+    if (is.null(date)) {
+      tweets_all_users <- purrr::map_dfr(.x = existing_users_location,
+                                   .f = function(x) {
+                                     readRDS(x)
+                                   })
+    } else {
+      tweets_all_users <- purrr::map_dfr(.x = existing_users_location,
+                                   .f = function(x) {
+                                     readRDS(x) %>% 
+                                       dplyr::filter(created_at>as.POSIXct(as.Date(since)))
+                                   })
+    }
+    
+  } else {
+    tweets_all_users <- NULL
+  }
+  
+  tweets_all <- dplyr::bind_rows(tweets_from_lists,
+                                 tweets_all_users)
+  
   if (save==TRUE) {
     fs::dir_create(path = "tweets_all")
     saveRDS(object = tweets_all,
             file = fs::path("tweets_all", "tweets_all.rds"))
-    message(paste("\nTweets have been saved in", sQuote(fs::path("tweets_all", "tweets_all.rds"))))
+    message(paste("\nTweets have been saved in", sQuote(fs::path("tweets_all", paste0(Sys.time(), "-tweets_all.rds")))))
   }
   return(tweets_all)
 }
