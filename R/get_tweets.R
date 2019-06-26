@@ -135,14 +135,13 @@ qf_get_tweets_from_list <- function(list_id = NULL,
       dplyr::filter(slug_l == slug) %>% 
       dplyr::pull(list_id)
   }
-  fs::dir_create(path = fs::path("tweets_from_list", list_id), recurse = TRUE)
+  today_folder <- fs::path("tweets_from_list", list_id, Sys.Date())
+  fs::dir_create(path = today_folder, recurse = TRUE)
   local_tweets_location <- fs::dir_ls(path = fs::path("tweets_from_list", list_id),
                                       recurse = TRUE,
                                       type = "file",
                                       glob = "*.rds")
   if (length(local_tweets_location)==0) {
-    today_folder <- fs::path("tweets_from_list", list_id, Sys.Date())
-    fs::dir_create(path = today_folder, recurse = TRUE)
     tweets_from_list <- rtweet::lists_statuses(list_id = list_id,
                                                n = n,
                                                include_rts = include_rts,
