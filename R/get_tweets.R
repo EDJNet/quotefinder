@@ -165,10 +165,10 @@ qf_get_tweets_from_list <- function(list_id = NULL,
       if (fs::file_exists(cached_list_location)==TRUE) {
         list_users <- readRDS(file = cached_list_location)
       } else {
-        list_users <- lists_users(user = owner_user,
-                                  reverse = TRUE,
-                                  token = NULL,
-                                  parse = TRUE)
+        list_users <- rtweet::lists_users(user = owner_user,
+                                          reverse = TRUE,
+                                          token = NULL,
+                                          parse = TRUE)
         saveRDS(object = list_users, file = cached_list_location)
       }
     }
