@@ -167,7 +167,7 @@ qf_get_tweets_from_list <- function(list_id = NULL,
       } else {
         list_users <- rtweet::lists_users(user = owner_user,
                                           reverse = TRUE,
-                                          token = NULL,
+                                          token = twitter_token,
                                           parse = TRUE)
         saveRDS(object = list_users, file = cached_list_location)
       }
