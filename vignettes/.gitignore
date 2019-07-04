@@ -8,3 +8,5 @@ data
 tweets_from_list
 lists_by_user
 data_wordcloud_app
+tweets_by_user_legacy
+users_id
