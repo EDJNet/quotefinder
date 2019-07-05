@@ -19,42 +19,38 @@ qf_wordcloud_app <- function() {
     stop("You need to install the `DT` package with `install.packages('DT')` to use this function.")
   }
  
-  
-  if (!require("pacman")) install.packages("pacman", repos = "https://cloud.r-project.org") # for taking care of package installation/loading
-  
-  pacman::p_load("shiny")
-  pacman::p_load("tidytext")
-  pacman::p_load("wordcloud")
-  pacman::p_load("wordcloud2")
-  pacman::p_load("stringr")
-  pacman::p_load("tidyverse")
-  pacman::p_load("reshape2")
-  pacman::p_load("stopwords")
-  pacman::p_load("syuzhet")
-  pacman::p_load("colourpicker")
-  pacman::p_load("shinyWidgets")
-  pacman::p_load("RColorBrewer")
-  pacman::p_load("shinydashboard")
-  pacman::p_load("shinycustomloader")
-  pacman::p_load("DT")
-  pacman::p_load("webshot")
+  library("shiny")
+  library("tidytext")
+  library("wordcloud")
+  library("wordcloud2")
+  library("stringr")
+  library("tidyverse")
+  library("reshape2")
+  library("stopwords")
+  library("syuzhet")
+  library("colourpicker")
+  library("shinyWidgets")
+  library("RColorBrewer")
+  library("shinydashboard")
+  library("shinycustomloader")
+  library("DT")
+  library("webshot")
   
   # install phantomjs at first run to enable downloading png wordclouds
   # webshot::install_phantomjs()
   
-  dataset <- readRDS(file = file.path("data_wordcloud_app", "dataset.rds"))
-  hashtagsList <- readRDS(file = file.path("data_wordcloud_app", "hashtags.rds"))
-  trendingHashtags <- readRDS(file = file.path("data_wordcloud_app", "trendingHashtags.rds"))
-  lang <- readRDS(file = file.path("data_wordcloud_app", "lang.rds"))
-  EPGroupShort <- readRDS(file = file.path("data_wordcloud_app", "EPGroupShort.rds"))
-  countries <- readRDS(file = file.path("data_wordcloud_app", "countries.rds"))
+  dataset <- readRDS(file = file.path("qf_wordcloud_app_data", "dataset.rds"))
+  hashtagsList <- readRDS(file = file.path("qf_wordcloud_app_data", "hashtags.rds"))
+  trendingHashtags <- readRDS(file = file.path("qf_wordcloud_app_data", "trendingHashtags.rds"))
+  lang <- readRDS(file = file.path("qf_wordcloud_app_data", "lang.rds"))
+  EPGroupShort <- readRDS(file = file.path("qf_wordcloud_app_data", "EPGroupShort.rds"))
+  countries <- readRDS(file = file.path("qf_wordcloud_app_data", "countries.rds"))
   
-  palettes <- readRDS(file = file.path("data_wordcloud_app", "palettes.rds"))
+  palettes <- readRDS(file = file.path("qf_wordcloud_app_data", "palettes.rds"))
   
   pal <- brewer.pal(9,"Blues")
   pal <- pal[-(1:5)]
-  
-  
+
   
   # European formatting of large numbers
   point <- scales::format_format(big.mark = ".", decimal.mark = ",", scientific = FALSE)
@@ -80,7 +76,7 @@ qf_wordcloud_app <- function() {
   }
   
   langTable <- left_join(x = data_frame(lang = unlist(lang)),
-                         y = readRDS(file.path("data_wordcloud_app", "langCode.rds")) %>%rename(lang = alpha2), by = "lang") %>% 
+                         y = readRDS(file.path("qf_wordcloud_app_data", "langCode.rds")) %>%rename(lang = alpha2), by = "lang") %>% 
     mutate(English = stringr::str_extract(string = English, pattern = regex("[[:alnum:]]+")))
   
   # Enable bookmarking
