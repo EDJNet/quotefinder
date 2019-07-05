@@ -83,14 +83,14 @@ qf_bind_rows_tweets <- function(users = NULL,
   
   tweets_all <- dplyr::bind_rows(tweets_from_lists,
                                  tweets_all_users) %>% 
-    dplyr::distinct(status_id) %>% 
+    dplyr::distinct(status_id, .keep_all = TRUE) %>% 
     dplyr::filter(is_retweet == include_rts | is_retweet == FALSE)
   
   if (save==TRUE) {
-    fs::dir_create(path = "tweets_all")
-    saveRDS(object = tweets_all,
-            file = fs::path("tweets_all", "tweets_all.rds"))
-    message(paste("\nTweets have been saved in", sQuote(fs::path("tweets_all", paste0(Sys.time(), "-tweets_all.rds")))))
+    fs::dir_create(path = "tweets_processed")
+    readr::write_rds(x = tweets_all,
+            path = fs::path("tweets_processed", "tweets_all.rds"))
+    message(paste("\nTweets have been saved in", sQuote(fs::path("tweets_processed", "tweets_all.rds"))))
   }
   return(tweets_all)
 }
