@@ -13,6 +13,7 @@ qf_bind_rows_tweets <- function(users = NULL,
                                 lists = NULL,
                                 since = Sys.Date()-31, 
                                 include_rts = FALSE,
+                                add_date_column = TRUE,
                                 save = TRUE,
                                 twitter_token = NULL) {
   
@@ -66,15 +67,15 @@ qf_bind_rows_tweets <- function(users = NULL,
     
     if (is.null(date)) {
       tweets_all_users <- purrr::map_dfr(.x = existing_users_location,
-                                   .f = function(x) {
-                                     readRDS(x)
-                                   })
+                                         .f = function(x) {
+                                           readRDS(x)
+                                         })
     } else {
       tweets_all_users <- purrr::map_dfr(.x = existing_users_location,
-                                   .f = function(x) {
-                                     readRDS(x) %>% 
-                                       dplyr::filter(created_at>as.POSIXct(as.Date(since)))
-                                   })
+                                         .f = function(x) {
+                                           readRDS(x) %>% 
+                                             dplyr::filter(created_at>as.POSIXct(as.Date(since)))
+                                         })
     }
     
   } else {
@@ -86,11 +87,215 @@ qf_bind_rows_tweets <- function(users = NULL,
     dplyr::distinct(status_id, .keep_all = TRUE) %>% 
     dplyr::filter(is_retweet == include_rts | is_retweet == FALSE)
   
+  if (add_date_column == TRUE) {
+    tweets_all <- tweets_all %>% 
+      dplyr::mutate(date = as.Date(created_at))
+  }
+  
   if (save==TRUE) {
     fs::dir_create(path = "tweets_processed")
     readr::write_rds(x = tweets_all,
-            path = fs::path("tweets_processed", "tweets_all.rds"))
+                     path = fs::path("tweets_processed", "tweets_all.rds"))
     message(paste("\nTweets have been saved in", sQuote(fs::path("tweets_processed", "tweets_all.rds"))))
   }
   return(tweets_all)
+}
+
+#' Create a list of available languages (tipically, to be used in a shiny app)
+#' 
+#' @export
+
+qf_create_language_list <- function() {
+  tweets_all <- readRDS(file = fs::path("tweets_processed", "tweets_all.rds"))
+  lang <- tibble::tibble(lang = unlist(tweets_all$lang)) %>%
+    tidyr::drop_na() %>%
+    dplyr::count(lang, sort = TRUE) %>% 
+    dplyr::select(lang)
+  lang_list <- as.list(lang$lang)
+  fs::dir_create(path = "tweets_processed")
+  readr::write_rds(x = lang_list,
+                   path = fs::path("tweets_processed", "tweets_lang_list.rds"))  
+  message(paste("\nOrdered language list has been saved in ", sQuote(fs::path("tweets_processed", "tweets_lang_list.rds"))))
+}
+
+
+#' Create an ordered list of hashtags (tipically, to be used in a shiny app)
+#' 
+#' @export
+#' 
+qf_create_hashtag_list <- function() {
+  tweets_all <- readRDS(file = fs::path("tweets_processed", "tweets_all.rds"))
+  
+  lang_list <-  readRDS(file = fs::path("tweets_processed", "tweets_lang_list.rds"))
+  
+  hashtags <- vector("list", length = length(lang_list))
+  hashtags <- setNames(object = hashtags, nm = unlist(lang_list))
+  for (i in seq_along(lang_list)) {
+    tempL <- tibble::tibble(hashtags = tweets_all %>%
+                              dplyr::filter(lang==lang_list[[i]]) %>%
+                              dplyr::select(hashtags) %>% 
+                              unlist()) %>% 
+      tidyr::drop_na()  %>%
+      dplyr::count(hashtags, sort = TRUE) %>% # make hashtags in order of most frequent, by language
+      dplyr::mutate(hashtagsLower = tolower(hashtags)) %>% # ignore case, but keep the case of the most frequently found case combination
+      dplyr::group_by(hashtagsLower) %>%
+      dplyr::add_tally(wt = n) %>%
+      dplyr::distinct(hashtagsLower, .keep_all = TRUE) %>%
+      dplyr::arrange(desc(n)) %>% 
+      dplyr::ungroup() %>%
+      dplyr::select(hashtags) %>% 
+      dplyr::pull(hashtags) %>%
+      as.list()
+    if (length(tempL) == 0) {
+      names(tempL) <- NULL
+    } else {
+      names(tempL) <- paste0("#", unlist(tempL))
+    }
+    hashtags[[i]] <- tempL
+  }
+  # Hashtags any Language
+  hashtagsAnyLanguage <- tibble::tibble(hashtags = tweets_all %>%
+                                          dplyr::select(hashtags) %>% 
+                                          unlist()) %>% 
+    tidyr::drop_na()  %>%
+    dplyr::count(hashtags, sort = TRUE) %>% # make hashtags in order of most frequent, by language
+    dplyr::mutate(hashtagsLower = tolower(hashtags)) %>% # ignore case, but keep the case of the most frequently found case combination
+    dplyr::group_by(hashtagsLower) %>%
+    dplyr::add_tally(wt = n) %>%
+    dplyr::distinct(hashtagsLower, .keep_all = TRUE) %>%
+    dplyr::arrange(dplyr::desc(n)) %>% 
+    dplyr::ungroup() %>%
+    dplyr::select(hashtags) %>% 
+    dplyr::pull(hashtags) %>%
+    as.list()
+  names(hashtagsAnyLanguage) <- paste0("#", unlist(hashtagsAnyLanguage))
+  hashtags$AnyLanguage <- hashtagsAnyLanguage
+  readr::write_rds(x = hashtags, path = fs::path("tweets_processed", "tweets_hashtags_list.rds"))
+  message(paste("\nOrdered hashtag list has been saved in ", sQuote(fs::path("tweets_processed", "tweets_hashtags_list.rds"))))
+}
+
+
+#' Create an ordered list of hashtags (tipically, to be used in a shiny app)
+#' 
+#' @export
+#' 
+qf_create_trending_hashtag_list <- function() {
+  tweets_all <- readRDS(file = fs::path("tweets_processed", "tweets_all.rds"))
+  
+  lang_list <-  readRDS(file = fs::path("tweets_processed", "tweets_lang_list.rds"))
+  
+  trending_hashtags <- vector("list", length = length(lang_list))
+  trending_hashtags <- setNames(object = trending_hashtags, nm = unlist(lang_list))
+  for (i in seq_along(lang_list)) {
+    currentDatasetPre <- tweets_all %>% 
+      dplyr::filter(is.na(hashtags)==FALSE) %>%
+      dplyr::filter(lang==lang_list[[i]])
+    
+    if(nrow(currentDatasetPre)>0) {
+      tempL <- currentDatasetPre %>% 
+        dplyr::select(date, hashtags) %>% 
+        dplyr::unnest() %>% 
+        dplyr::mutate(hashtags = tolower(hashtags)) %>% 
+        dplyr::mutate(NewOld = dplyr::if_else(condition = date>as.Date(Sys.Date()-8),
+                                              true = "New",
+                                              false = "Old")) %>% 
+        dplyr::count(hashtags, NewOld) %>% 
+        dplyr::ungroup() %>%
+        dplyr::spread(NewOld, n, fill = 0) 
+      
+      
+      currentHashtagsDF <- currentDatasetPre %>%
+        dplyr::select(screen_name, hashtags) %>%
+        dplyr::unnest() %>%
+        na.omit() %>% 
+        dplyr::group_by(hashtags) %>%
+        dplyr::add_count(sort = TRUE) %>% 
+        dplyr::rename(nTotalOrig = n) %>% 
+        dplyr::mutate(hashtagsLower = tolower(hashtags)) %>% # ignore case, but keep the case of the most frequently found case combination
+        dplyr::group_by(hashtagsLower) %>%
+        dplyr::add_tally() %>%
+        dplyr::ungroup() %>% 
+        dplyr::rename(nTotal = n) %>% 
+        dplyr::group_by(hashtags, nTotal) %>% 
+        dplyr::distinct(screen_name, .keep_all = TRUE) %>% 
+        dplyr::add_count() %>% 
+        dplyr::rename(nMepPerHashtag = n) %>% 
+        dplyr::select(-screen_name) %>% 
+        dplyr::arrange(dplyr::desc(nMepPerHashtag), dplyr::desc(nTotal)) %>% 
+        dplyr::ungroup() %>% 
+        dplyr::distinct(hashtagsLower, .keep_all = TRUE) %>% 
+        dplyr::mutate(hashtagString = paste0("#", hashtags, " (", nMepPerHashtag, " MEPs, ", nTotal, " tweets)"))
+    }
+    
+    ##  consider also how many MEPs
+    
+    
+    if (ncol(tempL)==3) {
+      tempL <- tempL %>% 
+        dplyr::mutate_if(is.numeric, funs((. + 1) / sum(. + 1))) %>%
+        dplyr::mutate(logratio = log(New / Old)) %>%
+        dplyr::arrange(desc(logratio)) %>% 
+        dplyr::transmute(hashtags, NewLog = logratio) %>% 
+        head(200) 
+      
+      tempL <- dplyr::left_join(tempL, 
+                                currentHashtagsDF %>% dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
+                                by = "hashtags") %>% 
+        dplyr::arrange(desc(NewLog*nMepPerHashtag)) %>% 
+        head(10) %>% 
+        dplyr::pull(hashtags)
+      
+      trending_hashtags[[i]] <- paste0("#", as.character(hashtags[[i]])[is.element(el = tolower(as.character(hashtags[[i]])), set = tempL)])
+    }
+  }
+  currentHashtagsDF <-  tweets_all %>% 
+    dplyr::filter(is.na(hashtags)==FALSE) %>%
+    dplyr::select(screen_name, hashtags) %>%
+    dplyr::unnest() %>%
+    na.omit() %>% 
+    dplyr::group_by(hashtags) %>%
+    dplyr::add_count(sort = TRUE) %>% 
+    dplyr::rename(nTotalOrig = n) %>% 
+    dplyr::mutate(hashtagsLower = tolower(hashtags)) %>% # ignore case, but keep the case of the most frequently found case combination
+    dplyr::group_by(hashtagsLower) %>%
+    dplyr::add_tally() %>%
+    dplyr::ungroup() %>% 
+    dplyr::rename(nTotal = n) %>% 
+    dplyr::group_by(hashtags, nTotal) %>% 
+    dplyr::distinct(screen_name, .keep_all = TRUE) %>% 
+    dplyr::add_count() %>% 
+    dplyr::rename(nMepPerHashtag = n) %>% 
+    dplyr::select(-screen_name) %>% 
+    dplyr::arrange(desc(nMepPerHashtag), desc(nTotal)) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::distinct(hashtagsLower, .keep_all = TRUE) %>% 
+    dplyr::mutate(hashtagString = paste0("#", hashtags, " (", nMepPerHashtag, " MEPs, ", nTotal, " tweets)"))
+  
+  temptrending_hashtags <- 
+    tweets_all %>% 
+    dplyr::filter(is.na(hashtags)==FALSE) %>% 
+    dplyr::select(date, hashtags) %>% 
+    dplyr::unnest() %>% 
+    dplyr::mutate(hashtags = tolower(hashtags)) %>% 
+    dplyr::mutate(NewOld = dplyr::if_else(condition = date>as.Date(Sys.Date()-8),
+                                          true = "New", false = "Old")) %>% 
+    dplyr::count(hashtags, NewOld) %>% 
+    dplyr::ungroup() %>%
+    tidyr::spread(NewOld, n, fill = 0) %>%
+    dplyr::mutate_if(is.numeric, funs((. + 1) / sum(. + 1))) %>%
+    dplyr::mutate(logratio = log(New / Old)) %>%
+    dplyr::arrange(desc(logratio)) %>% 
+    dplyr::transmute(hashtags, NewLog = logratio) 
+  
+  temptrending_hashtags <- left_join(temptrending_hashtags, 
+                                     currentHashtagsDF %>% dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
+                                     by = "hashtags") %>% 
+    dplyr::arrange(desc(NewLog*nMepPerHashtag)) %>% 
+    head(10) %>% 
+    dplyr::pull(hashtags)
+  
+  trending_hashtags$AnyLanguage <- paste0("#", as.character(hashtags$AnyLanguage)[is.element(el = tolower(as.character(hashtags$AnyLanguage)), set = temptrending_hashtags)])
+  
+  readr::write_rds(x = trending_hashtags,
+                   path = fs::path("tweets_processed", "tweets_trending_hashtags.rds"))
 }
