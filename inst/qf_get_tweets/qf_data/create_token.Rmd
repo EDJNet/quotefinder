@@ -1,0 +1,42 @@
+---
+title: "Create Twitter token"
+author: "Giorgio Comai"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Detailed instructions on how to create an app on twitter at the following link:
+
+http://rtweet.info/articles/auth.html
+
+If you have already created an app, find all details at the following link and adjust details accordingly in the script below:
+
+https://apps.twitter.com/
+
+
+```{r}
+library("rtweet")
+
+
+
+## whatever name you assigned to your created app
+appname <- "rtweet_token"
+
+## api key (example below is not a real key)
+key <- "XYznzPFOFZR2a39FwWKN1Jp41"
+
+## api secret (example below is not a real key)
+secret <- "CtkGEWmSevZqJuKl6HHrBxbCybxI1xGLqrD5ynPd9jG0SoHZbD"
+
+## create token named "twitter_token"
+twitter_token <- create_token(
+  app = appname,
+  consumer_key = key,
+  consumer_secret = secret)
+
+saveRDS(twitter_token, file = "twitter_token.rds")
+```
+
