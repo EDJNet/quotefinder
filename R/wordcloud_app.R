@@ -39,14 +39,13 @@ qf_wordcloud_app <- function() {
   # install phantomjs at first run to enable downloading png wordclouds
   # webshot::install_phantomjs()
   
-  dataset <- readRDS(file = file.path("qf_wordcloud_app_data", "dataset.rds"))
-  hashtagsList <- readRDS(file = file.path("qf_wordcloud_app_data", "hashtags.rds"))
-  trendingHashtags <- readRDS(file = file.path("qf_wordcloud_app_data", "trendingHashtags.rds"))
-  lang <- readRDS(file = file.path("qf_wordcloud_app_data", "lang.rds"))
-  EPGroupShort <- readRDS(file = file.path("qf_wordcloud_app_data", "EPGroupShort.rds"))
-  countries <- readRDS(file = file.path("qf_wordcloud_app_data", "countries.rds"))
-  
-  palettes <- readRDS(file = file.path("qf_wordcloud_app_data", "palettes.rds"))
+  dataset <- readRDS(file = file.path("qf_data", "tweets_processed", "dataset.rds"))
+  hashtagsList <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_hashtags_list.rds"))
+  trendingHashtags <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_trending_hashtags_list.rds"))
+  lang <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_lang_list.rds"))
+  EPGroupShort <- readRDS(file = file.path("qf_data", "tweets_processed", "EPGroupShort.rds"))
+  countries <- readRDS(file = file.path("qf_data", "tweets_processed", "countries.rds"))
+  palettes <- readRDS(file = file.path("qf_data", "tweets_processed", "palettes.rds"))
   
   pal <- brewer.pal(9,"Blues")
   pal <- pal[-(1:5)]
@@ -75,8 +74,8 @@ qf_wordcloud_app <- function() {
     invisible(NULL)
   }
   
-  langTable <- left_join(x = data_frame(lang = unlist(lang)),
-                         y = readRDS(file.path("qf_wordcloud_app_data", "langCode.rds")) %>%rename(lang = alpha2), by = "lang") %>% 
+  langTable <- left_join(x = tibble::tibble(lang = unlist(lang)),
+                         y = readRDS(file.path("qf_data", "tweets_processed", "langCode.rds")) %>% rename(lang = alpha2), by = "lang") %>% 
     mutate(English = stringr::str_extract(string = English, pattern = regex("[[:alnum:]]+")))
   
   # Enable bookmarking
@@ -308,7 +307,7 @@ qf_wordcloud_app <- function() {
       # filter by country
       if (is.null(input$countryFilter)==FALSE) {
         dataset <- dataset %>% 
-          filter(stringr::str_detect(string = NATIONALITY, pattern = paste(input$countryFilter, collapse = "|")))
+          filter(stringr::str_detect(string = country, pattern = paste(input$countryFilter, collapse = "|")))
       }
       
       #filter hashtag
@@ -445,8 +444,8 @@ qf_wordcloud_app <- function() {
           filter(stringr::str_detect(string = GroupShort, pattern = paste(input$EPgroup, collapse = "|")))
       }
       
-      temp <- dataset %>% distinct(NAME, screen_name) %>% filter(is.na(NAME)==FALSE) %>% arrange(NAME)
-      currentMEPsList <- structure(as.list(temp$screen_name), names = as.character(temp$NAME))
+      temp <- dataset %>% distinct(fullName, screen_name) %>% filter(is.na(fullName)==FALSE) %>% arrange(fullName)
+      currentMEPsList <- structure(as.list(temp$screen_name), names = as.character(temp$fullName))
       currentMEPsList
       
     })
@@ -475,7 +474,7 @@ qf_wordcloud_app <- function() {
     
     output$country_filter_UI <- renderUI({
       shiny::selectizeInput(inputId = "countryFilter", label = "Filter by country",
-                            choices = as.list(unique(dataset$NATIONALITY) %>% sort()),
+                            choices = as.list(unique(dataset$country) %>% sort()),
                             multiple = TRUE)
     })
     
@@ -638,8 +637,8 @@ qf_wordcloud_app <- function() {
             temp %>% 
               # nrc sentiment, removing words that are both positive and negative
               inner_join(y = syuzhet::get_sentiment_dictionary(dictionary = "nrc",
-                                                               lang = langTable %>% filter(lang==input$language) %>% pull(English) %>% tolower()) %>%
-                           filter(sentiment=="negative"|sentiment=="positive") %>% add_count(word) %>% filter(n==1) %>% select(-n), by = "word") %>%
+                                                               lang = langTable %>% filter(lang=="en") %>% pull(English) %>% tolower()) %>%
+                           dplyr::filter(sentiment=="negative"|sentiment=="positive") %>% add_count(word) %>% filter(n==1) %>% select(-n), by = "word") %>%
               count(word, sentiment, sort = TRUE) %>%
               acast(word ~ sentiment, value.var = "n", fill = 0) %>%
               comparison.cloud(colors = c("#F8766D", "#00BFC4"),
@@ -661,7 +660,7 @@ qf_wordcloud_app <- function() {
         temp <- dataset %>% 
           filter(lang==input$language) %>% 
           filter(stringr::str_detect(string = GroupShort, pattern = paste(input$EPgroup, collapse = "|"))) %>%
-          select(clean_text, NATIONALITY, GroupShort) %>% 
+          select(clean_text, country, GroupShort) %>% 
           unnest_tokens(input = clean_text, output = word) %>% 
           # remove stopwords, if list for the relevant language is available, otherwise do nothing
           when(is.element(el = input$language, set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
