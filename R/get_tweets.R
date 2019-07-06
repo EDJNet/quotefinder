@@ -15,7 +15,7 @@ qf_get_tweets_by_user <- function(users,
                                   cache_id = TRUE,
                                   twitter_token = NULL) {
   
-  if (is.numeric(users)==FALSE) {
+  if (suppressWarnings(sum(is.na(as.numeric(users)))>0)==TRUE) {
     if (cache_id==TRUE) {
       fs::dir_create(path = "users_id")
       if (fs::file_exists(fs::path("users_id", "users_id.rds"))==TRUE) {
