@@ -184,6 +184,8 @@ qf_create_trending_hashtag_list <- function() {
   
   lang_list <-  readRDS(file = fs::path("tweets_processed", "tweets_lang_list.rds"))
   
+  hashtags <- readRDS(file = fs::path("tweets_processed", "tweets_hashtags_list.rds"))
+  
   trending_hashtags <- vector("list", length = length(lang_list))
   trending_hashtags <- setNames(object = trending_hashtags, nm = unlist(lang_list))
   for (i in seq_along(lang_list)) {
@@ -194,19 +196,19 @@ qf_create_trending_hashtag_list <- function() {
     if(nrow(currentDatasetPre)>0) {
       tempL <- currentDatasetPre %>% 
         dplyr::select(date, hashtags) %>% 
-        dplyr::unnest() %>% 
+        tidyr::unnest() %>% 
         dplyr::mutate(hashtags = tolower(hashtags)) %>% 
         dplyr::mutate(NewOld = dplyr::if_else(condition = date>as.Date(Sys.Date()-8),
                                               true = "New",
                                               false = "Old")) %>% 
         dplyr::count(hashtags, NewOld) %>% 
         dplyr::ungroup() %>%
-        dplyr::spread(NewOld, n, fill = 0) 
+        tidyr::spread(NewOld, n, fill = 0) 
       
       
       currentHashtagsDF <- currentDatasetPre %>%
         dplyr::select(screen_name, hashtags) %>%
-        dplyr::unnest() %>%
+        tidyr::unnest() %>%
         na.omit() %>% 
         dplyr::group_by(hashtags) %>%
         dplyr::add_count(sort = TRUE) %>% 
@@ -232,16 +234,16 @@ qf_create_trending_hashtag_list <- function() {
     
     if (ncol(tempL)==3) {
       tempL <- tempL %>% 
-        dplyr::mutate_if(is.numeric, funs((. + 1) / sum(. + 1))) %>%
+        dplyr::mutate_if(is.numeric, dplyr::funs((. + 1) / sum(. + 1))) %>%
         dplyr::mutate(logratio = log(New / Old)) %>%
-        dplyr::arrange(desc(logratio)) %>% 
+        dplyr::arrange(dplyr::desc(logratio)) %>% 
         dplyr::transmute(hashtags, NewLog = logratio) %>% 
         head(200) 
       
       tempL <- dplyr::left_join(tempL, 
                                 currentHashtagsDF %>% dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
                                 by = "hashtags") %>% 
-        dplyr::arrange(desc(NewLog*nMepPerHashtag)) %>% 
+        dplyr::arrange(dplyr::desc(NewLog*nMepPerHashtag)) %>% 
         head(10) %>% 
         dplyr::pull(hashtags)
       
@@ -251,7 +253,7 @@ qf_create_trending_hashtag_list <- function() {
   currentHashtagsDF <-  tweets_all %>% 
     dplyr::filter(is.na(hashtags)==FALSE) %>%
     dplyr::select(screen_name, hashtags) %>%
-    dplyr::unnest() %>%
+    tidyr::unnest() %>%
     na.omit() %>% 
     dplyr::group_by(hashtags) %>%
     dplyr::add_count(sort = TRUE) %>% 
@@ -266,7 +268,7 @@ qf_create_trending_hashtag_list <- function() {
     dplyr::add_count() %>% 
     dplyr::rename(nMepPerHashtag = n) %>% 
     dplyr::select(-screen_name) %>% 
-    dplyr::arrange(desc(nMepPerHashtag), desc(nTotal)) %>% 
+    dplyr::arrange(dplyr::desc(nMepPerHashtag), dplyr::desc(nTotal)) %>% 
     dplyr::ungroup() %>% 
     dplyr::distinct(hashtagsLower, .keep_all = TRUE) %>% 
     dplyr::mutate(hashtagString = paste0("#", hashtags, " (", nMepPerHashtag, " MEPs, ", nTotal, " tweets)"))
@@ -275,27 +277,27 @@ qf_create_trending_hashtag_list <- function() {
     tweets_all %>% 
     dplyr::filter(is.na(hashtags)==FALSE) %>% 
     dplyr::select(date, hashtags) %>% 
-    dplyr::unnest() %>% 
+    tidyr::unnest() %>% 
     dplyr::mutate(hashtags = tolower(hashtags)) %>% 
     dplyr::mutate(NewOld = dplyr::if_else(condition = date>as.Date(Sys.Date()-8),
                                           true = "New", false = "Old")) %>% 
     dplyr::count(hashtags, NewOld) %>% 
     dplyr::ungroup() %>%
     tidyr::spread(NewOld, n, fill = 0) %>%
-    dplyr::mutate_if(is.numeric, funs((. + 1) / sum(. + 1))) %>%
+    dplyr::mutate_if(is.numeric, dplyr::funs((. + 1) / sum(. + 1))) %>%
     dplyr::mutate(logratio = log(New / Old)) %>%
-    dplyr::arrange(desc(logratio)) %>% 
+    dplyr::arrange(dplyr::desc(logratio)) %>% 
     dplyr::transmute(hashtags, NewLog = logratio) 
   
-  temptrending_hashtags <- left_join(temptrending_hashtags, 
+  temptrending_hashtags <- dplyr::left_join(temptrending_hashtags, 
                                      currentHashtagsDF %>% dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
                                      by = "hashtags") %>% 
-    dplyr::arrange(desc(NewLog*nMepPerHashtag)) %>% 
+    dplyr::arrange(dplyr::desc(NewLog*nMepPerHashtag)) %>% 
     head(10) %>% 
     dplyr::pull(hashtags)
   
   trending_hashtags$AnyLanguage <- paste0("#", as.character(hashtags$AnyLanguage)[is.element(el = tolower(as.character(hashtags$AnyLanguage)), set = temptrending_hashtags)])
   
   readr::write_rds(x = trending_hashtags,
-                   path = fs::path("tweets_processed", "tweets_trending_hashtags.rds"))
+                   path = fs::path("tweets_processed", "tweets_trending_hashtags_list.rds"))
 }
