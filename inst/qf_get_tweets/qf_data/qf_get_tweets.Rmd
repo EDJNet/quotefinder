@@ -20,10 +20,20 @@ twitter_token <- readRDS(file = "twitter_token.rds")
 
 
 ```{r gettweets}
-qf_get_tweets_from_list(slug = "all-meps-on-twitter",
-                        owner_user = "europarl_en",
+qf_get_tweets_from_list(slug = "meps-2019-2024",
+                        owner_user = "EuroParlPress",
                         n = 3200,
                         include_rts = FALSE,
                         twitter_token = twitter_token)
+```
+
+
+```{r}
+all_members <- rtweet::lists_members(1138737420671885312, token = twitter_token)
+```
+
+
+```{r}
+qf_get_tweets_by_user(users = all_members$user_id, n = 3200, wait = 300, twitter_token = twitter_token)
 ```
 
