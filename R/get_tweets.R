@@ -195,7 +195,11 @@ qf_get_tweets_from_list <- function(list_id = NULL,
             file = fs::path(today_folder,
                             paste0(Sys.time(), "-", "list_id.rds")))
   } else {
-    previous_tweets <- readRDS(file = local_tweets_location %>% tail(1))
+    for (i in 1:100) {
+      previous_tweets <- readRDS(file = local_tweets_location[length(local_tweets_location)+1-i])
+      if (nrow(previous_tweets)>0) break
+    }
+    
     if (is.null(since_id)==TRUE) {
       tweets_from_list <- rtweet::lists_statuses(list_id = list_id,
                                                  n = n,
