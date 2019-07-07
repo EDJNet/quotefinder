@@ -73,7 +73,7 @@ all_MEPs_group_twitter <-
   all_MEPs %>% 
   left_join(y = tibble::tibble(twitter_urls = twitter_urls, fullName = fullName), by = "fullName")  %>% 
   mutate(officialURL = paste0("https://www.europarl.europa.eu/meps/en/", id)) %>% 
-  mutate(screen_name = str_remove(string = twitter_urls, pattern = "https://twitter.com/")) 
+  mutate(screen_name = str_remove(string = twitter_urls, pattern = "https://twitter.com/")) %>% 
   left_join(y = groups %>% dplyr::rename(politicalGroup=GroupLong), by = "politicalGroup")
 ```
 
