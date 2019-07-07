@@ -983,14 +983,14 @@ qf_wordcloud_app <- function(shiny_port = 3939,  shiny_host = "0.0.0.0") {
     
     #### DataTable ####
     
-    output$table <- DT::renderDataTable({
+    output$table <- DT::renderDataTable(expr = {
       DT::datatable(data = currentDataset() %>% 
                       arrange(desc(time))%>%
                       select(screen_name, date, text, Link, GroupShort) %>% 
                       head(10000) %>% 
                       rename(`Twitter handle` = screen_name, Date = date, Tweet = text, `EP Group` = "GroupShort"),
                     escape = FALSE, options = list(pageLength = 5, lengthMenu = c(3, 5, 10, 15, 20)), rownames=FALSE)
-    })
+    }, server = TRUE)
     
     ### InfoBox ####
     
