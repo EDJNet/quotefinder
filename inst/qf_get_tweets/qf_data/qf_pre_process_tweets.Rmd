@@ -44,8 +44,7 @@ allMEPtweetsDF <- readr::read_rds(path = fs::path("tweets_processed", "tweets_al
   dplyr::rename(time = created_at) %>% 
   dplyr::select(screen_name, date, time, text, status_id, retweet_count, favorite_count, lang, hashtags, urls_expanded_url) %>% 
   dplyr::mutate(screen_name_lower = tolower(screen_name)) %>% 
-  dplyr::select(-screen_name) %>% 
-  dplyr::left_join(y = readr::read_rds(fs::path("tweets_processed", "all_MEPs_group_twitter.rds")), by = "screen_name_lower") 
+  dplyr::left_join(y = readr::read_rds(fs::path("tweets_processed", "all_MEPs_group_twitter.rds")) %>% dplyr::select(-screen_name), by = "screen_name_lower") 
 
 
 

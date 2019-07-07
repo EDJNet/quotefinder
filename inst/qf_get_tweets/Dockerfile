@@ -1,4 +1,4 @@
-FROM rocker/r-base
+FROM rocker/r-ver:3.6.0
 
 RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev libssl-dev
@@ -11,6 +11,7 @@ RUN R -e 'remotes::install_cran("rmarkdown")'
 
 RUN R -e 'remotes::install_cran("shiny")'
 RUN R -e 'remotes::install_cran("dplyr")'
+RUN R -e 'remotes::install_cran("tidyr")'
 RUN R -e 'remotes::install_cran("rtweet")'
 RUN R -e 'remotes::install_cran("stringr")'
 RUN R -e 'remotes::install_cran("fs")'
@@ -24,4 +25,3 @@ RUN R -e 'remotes::install_cran("tidytext")'
 RUN R -e 'remotes::install_github("giocomai/edjnetquotefinder")'
 
 CMD Rscript /home/qf/qf_data/qf_get_tweets.R
-

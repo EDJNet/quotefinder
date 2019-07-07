@@ -19,12 +19,16 @@ qf_wordcloud_app <- function(shiny_port = 3939,  shiny_host = "0.0.0.0") {
     stop("You need to install the `DT` package with `install.packages('DT')` to use this function.")
   }
  
+  library("dplyr")
+  library("tidyr")
+  library("purrr")
+  library("scales")
+  library("ggplot2")
   library("shiny")
   library("tidytext")
   library("wordcloud")
   library("wordcloud2")
   library("stringr")
-  library("tidyverse")
   library("reshape2")
   library("stopwords")
   library("syuzhet")
@@ -103,10 +107,8 @@ qf_wordcloud_app <- function(shiny_port = 3939,  shiny_host = "0.0.0.0") {
                 #### Box 1: Wordcloud ####
                 tabBox(id = "wordcloud_plot",
                        tabPanel("Wordcloud",
-                                uiOutput("warning"), 
-                                withLoader(ui_element = wordcloud2Output("wordcloud2"),
-                                           type = "html",
-                                           loader = "loader5"),
+                                uiOutput("warning"),
+                                wordcloud2Output("wordcloud2"),
                                 splitLayout(
                                   shiny::sliderInput(inputId = "sizeVarWC2",
                                                      label = "Wordcloud size",

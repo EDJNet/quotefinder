@@ -23,4 +23,4 @@ RUN R -e 'remotes::install_cran("magrittr")'
 RUN R -e 'remotes::install_cran("tidytext")'
 RUN R -e 'remotes::install_cran("readr")'
 
-RUN R -e 'remotes::install_github("giocomai/edjnetquotefinder")'
+RUN R -e 'remotes::install_github(repo = "giocomai/edjnetquotefinder")'
