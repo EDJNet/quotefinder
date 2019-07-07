@@ -1,0 +1,73 @@
+---
+title: "Pre-process tweets"
+author: "Giorgio Comai"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library("edjnetquotefinder")
+
+twitter_token <- readRDS(file = "twitter_token.rds")
+```
+
+```{r time}
+Sys.time()
+```
+
+```{r}
+all_members_id <- fs::dir_ls("tweets_by_user") %>% 
+  fs::path_file() %>% 
+  fs::path_ext_remove()
+
+qf_bind_rows_tweets(users = all_members_id,lists = 1138737420671885312)
+```
+
+```{r}
+qf_create_language_list()
+```
+
+
+```{r}
+qf_create_hashtag_list()
+```
+
+```{r}
+qf_create_trending_hashtag_list()
+
+```
+
+
+```{r}
+allMEPtweetsDF <- readr::read_rds(path = fs::path("tweets_processed", "tweets_all.rds")) %>% 
+  dplyr::arrange(dplyr::desc(created_at)) %>%
+  dplyr::rename(time = created_at) %>% 
+  dplyr::select(screen_name, date, time, text, status_id, retweet_count, favorite_count, lang, hashtags, urls_expanded_url) %>% 
+  dplyr::mutate(screen_name_lower = tolower(screen_name)) %>% 
+  dplyr::select(-screen_name) %>% 
+  dplyr::left_join(y = readr::read_rds(fs::path("tweets_processed", "all_MEPs_group_twitter.rds")), by = "screen_name_lower") 
+
+
+
+```
+
+```{r}
+## clean text
+allMEPtweetsDF$clean_text <- stringr::str_replace_all(
+  string = allMEPtweetsDF$text,
+  pattern = stringr::regex(pattern = "@\\w+|#[[:alnum:]]+|http[[:graph:]]+|RT ", ignore_case = FALSE), replacement = "")
+allMEPtweetsDF <- allMEPtweetsDF %>% dplyr::filter(stringr::str_detect(string = clean_text, pattern = stringr::fixed(pattern = "retweeted", ignore_case = TRUE))==FALSE)
+allMEPtweetsDF$clean_text <- stringr::str_replace_all(string = allMEPtweetsDF$clean_text, pattern = stringr::fixed("&amp;"), replacement = "&") 
+allMEPtweetsDF$clean_text <- stringr::str_replace_all(string = allMEPtweetsDF$clean_text, pattern = stringr::fixed("&gt;"), replacement = " ")
+allMEPtweetsDF$clean_text <- stringr::str_replace_all(string = allMEPtweetsDF$clean_text, pattern = stringr::fixed("&lt;"), replacement = " ") 
+allMEPtweetsDF$Link <- paste0("<a href='https://twitter.com/", allMEPtweetsDF$screen_name, "/status/", allMEPtweetsDF$status_id, "'  target='_blank'>Source</a>")
+
+```
+
+```{r}
+
+readr::write_rds(x = allMEPtweetsDF, 
+                 path = fs::path("tweets_processed", "dataset.rds"))
+  
+```
+

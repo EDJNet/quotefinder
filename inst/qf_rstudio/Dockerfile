@@ -20,5 +20,7 @@ RUN R -e 'remotes::install_cran("DT")'
 RUN R -e 'remotes::install_cran("glue")'
 RUN R -e 'remotes::install_cran("shinydashboard")'
 RUN R -e 'remotes::install_cran("magrittr")'
+RUN R -e 'remotes::install_cran("tidytext")'
+RUN R -e 'remotes::install_cran("readr")'
 
 RUN R -e 'remotes::install_github("giocomai/edjnetquotefinder")'

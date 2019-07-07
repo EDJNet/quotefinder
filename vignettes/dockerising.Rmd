@@ -1,0 +1,125 @@
+---
+title: "Deploy with Docker"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{dockerising}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+The easiest way to extract tweets regualarly and deploy a shiny app that facilitates exploring them is to use a server and run services with Docker. 
+
+In order to facilitate the process, `edjnetquotefinder` comes with dedicated and customisable Docker containers. 
+
+```{r echo=TRUE}
+
+
+```
+
+# Getting the tweets
+
+After having a server running, with Docker enabled, and having created a user with the rights to run docker containers, you should create a folder, called `qf_data`. At this stage, the folder should contain three files:
+
+1. an R file, with the sole purpose of running a rmarkdown document. The full content of the file can be as follows `rmarkdown::render(input = "/home/qf/qf_data/qf_get_tweets.Rmd")`. [See example](https://github.com/giocomai/edjnetquotefinder/blob/master/inst/qf_get_tweets/qf_data/qf_get_tweets.R).
+
+1. an rmarkdown file ([see example](https://github.com/giocomai/edjnetquotefinder/blob/master/inst/qf_get_tweets/qf_data/qf_get_tweets.Rmd)). It will likely be a basic document, which may just include a call to `qf_get_tweets_from_list()` or similar function. 
+
+1. a twitter token, stored e.g. as `twitter_token.rds`.
+
+An rmarkdown file is, of course, not stricly speaking necessary, but I find it makes it much easier to deal with issues such as folder locations, and allows to detail subsequent steps in an ordered fashion, no matter how complicated the procedure at hand. The R file can of course include calls to more than one rmarkdown files if this feels easier to manage. If useful, rmarkdown output files can be stored locally as a form of logging.
+
+To get started, on a host from the terminal run the following commands:
+
+```{r, engine = 'bash', eval = FALSE}
+mkdir qf_data
+cd qf_data
+wget https://raw.githubusercontent.com/giocomai/edjnetquotefinder/master/inst/qf_get_tweets/qf_data/qf_get_tweets.R
+
+wget https://raw.githubusercontent.com/giocomai/edjnetquotefinder/master/inst/qf_get_tweets/qf_data/qf_get_tweets.Rmd
+
+wget https://raw.githubusercontent.com/giocomai/edjnetquotefinder/master/inst/qf_get_tweets/qf_data/create_token.Rmd
+
+```
+
+If you already have a twitter token, you can copy it to the relevant subfolder as `twitter_token.rds`, and skip to the next step. If not, now it's the right time to create one. To do this, or simply to check that everything is in order, you may want to run an instance of rstudio server, preloaded with `edjnetquotefinder`.
+
+# Dockerised Rstudio with pre-loaded `edjnetquotefinder`
+
+In order to check if everything is in order, you may want to have a look at your server in an interactive R session.
+
+```{r, engine = 'bash', eval = FALSE}
+docker run --rm -p 28788:8787 -v $HOME/qf_data:/home/qf/qf_data -e USER=qf -e PASSWORD=ies5EshaiPh6 --name qf_rstudio giocomai/qf_rstudio 
+```
+
+N.B. keep qf as the user, but do change password! `ies5EshaiPh6` is just a random string. You can change the port where to make available Rstudio by changing the first part of `28788:8787` in the command above (add `-d` if you want this rstudio session to continue running).
+
+You can then access the rstudio session using the ip (or the domain name) associated with your host, like http://123.123.123.123:28788
+
+If you haven't yet created a Twitter token, you can do so by opening the `create_token.Rmd` file that you should find in the `qf_data` folder.
+
+At this stage, you can customise the `qf_get_tweets.Rmd` to download the tweets you are interested in. 
+
+Running the command in `qf_get_tweets.R` should process the rmarkdown file and store tweets locally. 
+
+You can use this interface to customise scripts, and troubleshoot any issues. If everything looks fine, you can proceed to the next section: having tweets updated regularly.
+
+# Have tweets updated regularly with cron
+
+While in principle it is possible to have a constantly running docker container, with cron running inside it, it is more advisable (and more efficient) to let the host machine handle the cron part, and start up the relevant docker container, have it update tweets, and then stop immediately.
+
+First, let's run the docker container tasked with updating tweets in an interactive session to check again if everything is running smoothly.
+
+```{r, engine = 'bash', eval = FALSE}
+docker run --rm -v $HOME/qf_data:/home/qf/qf_data giocomai/qf_get_tweets
+```
+
+All good? What about having the host updating tweets every hour?
+
+From the terminal on your host, run:
+
+```{r, engine = 'bash', eval = FALSE}
+
+crontab -e
+
+```
+
+At the end of the document, add:
+
+```{r, engine = 'bash', eval = FALSE}
+0 * * * * docker run --rm -v $HOME/qf_data:/home/qf/qf_data giocomai/qf_get_tweets
+```
+
+or, if you want to have a logfile for troubleshooting:
+
+```{r, engine = 'bash', eval = FALSE}
+0 * * * * docker run --rm -v $HOME/qf_data:/home/qf/qf_data giocomai/qf_get_tweets >> $HOME/qf_data/qf_get_tweets.log 2>&1
+```
+
+Leave an empty line at the end the crontab, save, and... you're done. This will update tweets every time an hour starts (e.g. at 8.00, at 9.00, etc.).
+
+If you are unfamiliar with cron, in order to customise frequency and time consider using [`cronR`](https://github.com/bnosac/cronR).
+
+
+# Run the app
+
+
+
+
+
+
+```{r setup}
+library(edjnetquotefinder)
+```
+
+```{r eval = FALSE}
+golem::add_dockerfile()
+```
+
