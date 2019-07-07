@@ -4,7 +4,7 @@
 \alias{qf_wordcloud_app}
 \title{Starts wordcloud shiny app}
 \usage{
-qf_wordcloud_app()
+qf_wordcloud_app(shiny_port = 3939)
 }
 \description{
 Starts wordcloud shiny app
