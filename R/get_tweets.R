@@ -220,7 +220,7 @@ qf_get_tweets_from_list <- function(list_id = NULL,
     
     saveRDS(object = tweets_from_list,
             file = fs::path(today_folder,
-                            paste0(Sys.time(), "-", "list_id.rds")))
+                            paste0(Sys.time(), "-", "list_id-", list_id, ".rds")))
   }
   return(tweets_from_list)
 }
