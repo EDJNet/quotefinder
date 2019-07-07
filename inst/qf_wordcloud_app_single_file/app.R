@@ -64,7 +64,6 @@ langTable <- left_join(x = tibble::tibble(lang = unlist(lang)),
 # Enable bookmarking
 enableBookmarking(store = "server")
 
-
 ui = shinydashboard::dashboardPage(
     shinydashboard::dashboardHeader(title = "EdjNet QuoteFinder"),
     shinydashboard::dashboardSidebar(sidebarMenu(
@@ -751,7 +750,7 @@ server = function(input, output, session) {
                             group_by(lang) %>% 
                             count(word, sort = TRUE) %>% 
                             add_tally(wt = n) %>% 
-                            arrange(desc(nn)) %>% 
+                            arrange(desc(n)) %>% 
                             ungroup() %>% 
                             mutate(lang = factor(x = lang, levels = unique(lang)))
                         

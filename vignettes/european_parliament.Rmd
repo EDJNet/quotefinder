@@ -66,6 +66,10 @@ groups <- tibble::tribble(~GroupLong, ~GroupShort,
 )
 ```
 
+```{r}
+readr::write_rds(x = as.list(groups$GroupShort), path = "EPGroupShort.rds")
+```
+
 
 
 ```{r}
