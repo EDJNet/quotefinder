@@ -1,0 +1,88 @@
+---
+title: "European Parliament"
+author: "Giorgio Comai"
+date: "7/6/2019"
+output: html_document
+---
+
+
+```{r}
+
+pacman::p_load("tidyverse")
+pacman::p_load("XML")
+
+remotes::install_github("giocomai/castarter")
+```
+
+
+```{r}
+all_MEPs <- XML::xmlToDataFrame(doc = "http://www.europarl.europa.eu/meps/en/full-list/xml", stringsAsFactors = FALSE)
+```
+
+```{r}
+colnames(all_MEPs)
+```
+
+```{r}
+library("castarter")
+
+SetCastarter(project = "ep", website = "meps")
+index_links <- paste0("http://www.europarl.europa.eu/meps/en/", all_MEPs$id)
+CreateFolders()
+DownloadContents(links = index_links, type = "index")
+```
+
+```{r}
+fullName <- ExtractTitles(container = "span", containerClass = "ep_name erpl-member-card-full-member-name", htmlLocation = fs::path("castarter", "ep", "meps", "IndexHtml"))
+
+twitter_urls <- 
+  purrr::map_chr(.x = seq_along(fullName), .f = function (x) {
+    temp <- ExtractLinks(container = "div", containerClass = "ep-p_text link_twitt", id = x)
+    if (length(temp)==0) {
+      NA
+    } else {
+      temp[[1]]
+    }
+  })
+
+twitter_urls <- 
+twitter_urls %>% str_remove(pattern = "\\?.*") %>% str_replace(pattern = "http://@", replacement = "https://twitter.com/") %>% str_replace(pattern = "https://www.twitter.com/", replacement = "https://twitter.com/") %>% str_replace(pattern = "http://www.twitter.com/", replacement = "https://twitter.com/") %>% str_remove(pattern = "/$")
+
+
+twitter_urls[str_detect(string = twitter_urls, pattern = "www.facebook.com")&is.na(twitter_urls)==FALSE] <- NA
+```
+
+
+```{r}
+groups <- tibble::tribble(~GroupLong, ~GroupShort,
+"Group of the European People's Party (Christian Democrats)", "EPP",
+"Non-attached Members", "NA",
+"Identity and Democracy Group", "ID",
+"Group of the Progressive Alliance of Socialists and Democrats in the European Parliament", "S&D",
+"European Conservatives and Reformists Group", "ECR",
+"Group of the Greens/European Free Alliance", "Greens–EFA",
+"Renew Europe Group", "RE",
+"Confederal Group of the European United Left - Nordic Green Left", "GUE-NGL"
+)
+```
+
+
+
+```{r}
+all_MEPs_group_twitter <- 
+  all_MEPs %>% 
+  left_join(y = tibble::tibble(twitter_urls = twitter_urls, fullName = fullName), by = "fullName")  %>% 
+  mutate(officialURL = paste0("https://www.europarl.europa.eu/meps/en/", id)) %>% 
+  mutate(screen_name = str_remove(string = twitter_urls, pattern = "https://twitter.com/")) %>% 
+  mutate(screen_name_lower = tolower(screen_name)) %>% 
+  left_join(y = groups %>% dplyr::rename(politicalGroup=GroupLong), by = "politicalGroup")
+```
+
+
+```{r}
+readr::write_rds(x = all_MEPs_group_twitter, path = "all_MEPs_group_twitter.rds")
+readr::write_csv(x = all_MEPs_group_twitter, path = "all_MEPs_group_twitter.csv")
+```
+
+
+
