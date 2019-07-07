@@ -73,16 +73,28 @@ all_MEPs_group_twitter <-
   all_MEPs %>% 
   left_join(y = tibble::tibble(twitter_urls = twitter_urls, fullName = fullName), by = "fullName")  %>% 
   mutate(officialURL = paste0("https://www.europarl.europa.eu/meps/en/", id)) %>% 
-  mutate(screen_name = str_remove(string = twitter_urls, pattern = "https://twitter.com/")) %>% 
-  mutate(screen_name_lower = tolower(screen_name)) %>% 
+  mutate(screen_name = str_remove(string = twitter_urls, pattern = "https://twitter.com/")) 
   left_join(y = groups %>% dplyr::rename(politicalGroup=GroupLong), by = "politicalGroup")
 ```
+
+Add those who have been added to the Twitter list of Press service, but whose Twitter account is not listed on the EP official website
+
+```{r}
+all_MEPs_group_twitter$screen_name[all_MEPs_group_twitter$fullName=="Belinda DE LUCY"] <- "BelindadeLucy"
+
+all_MEPs_group_twitter$screen_name[all_MEPs_group_twitter$fullName=="Rupert LOWE"] <- "rupertlowe10"
+
+```
+```{r}
+all_MEPs_group_twitter <- all_MEPs_group_twitter %>% 
+  mutate(screen_name_lower = tolower(screen_name))
+```
+
 
 
 ```{r}
 readr::write_rds(x = all_MEPs_group_twitter, path = "all_MEPs_group_twitter.rds")
 readr::write_csv(x = all_MEPs_group_twitter, path = "all_MEPs_group_twitter.csv")
 ```
-
 
 
