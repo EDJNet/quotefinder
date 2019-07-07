@@ -8,7 +8,7 @@
 #' AnalyseDataset()
 #' }
 
-qf_wordcloud_app <- function(shiny_port = 3939) {
+qf_wordcloud_app <- function(shiny_port = 3939,  shiny_host = "0.0.0.0") {
   if (requireNamespace("shiny", quietly = TRUE)==FALSE) {
     stop("You need to install the `shiny` package with `install.packages('shiny')` to use this function.")
   }
@@ -1042,6 +1042,6 @@ qf_wordcloud_app <- function(shiny_port = 3939) {
       
     })
     
-  }, options = options('shiny.port'=shiny_port)
+  }, options = options('shiny.port'=shiny_port, 'shiny.host'=shiny_host)
   )
 }
