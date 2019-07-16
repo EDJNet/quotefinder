@@ -43,14 +43,6 @@ qf_wordcloud_app <- function(shiny_port = 3939,  shiny_host = "0.0.0.0") {
   # install phantomjs at first run to enable downloading png wordclouds
   # webshot::install_phantomjs()
   
-  dataset <- readRDS(file = file.path("qf_data", "tweets_processed", "dataset.rds"))
-  hashtagsList <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_hashtags_list.rds"))
-  trendingHashtags <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_trending_hashtags_list.rds"))
-  lang <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_lang_list.rds"))
-  EPGroupShort <- readRDS(file = file.path("qf_data", "tweets_processed", "EPGroupShort.rds"))
-  countries <- readRDS(file = file.path("qf_data", "tweets_processed", "countries.rds"))
-  palettes <- readRDS(file = file.path("qf_data", "tweets_processed", "palettes.rds"))
-  
   pal <- brewer.pal(9,"Blues")
   pal <- pal[-(1:5)]
 
@@ -77,13 +69,21 @@ qf_wordcloud_app <- function(shiny_port = 3939,  shiny_host = "0.0.0.0") {
     writeLines(output, outputFile)
     invisible(NULL)
   }
-  
-  langTable <- left_join(x = tibble::tibble(lang = unlist(lang)),
-                         y = readRDS(file.path("qf_data", "tweets_processed", "langCode.rds")) %>% rename(lang = alpha2), by = "lang") %>% 
-    mutate(English = stringr::str_extract(string = English, pattern = regex("[[:alnum:]]+")))
+
   
   # Enable bookmarking
   enableBookmarking(store = "server")
+  
+  dataset_global_file_time <- fs::file_info(path = fs::path("qf_data", "tweets_processed", "dataset.rds")) %>% 
+    dplyr::pull(modification_time)
+  
+  dataset <- readRDS(file = file.path("qf_data", "tweets_processed", "dataset.rds"))
+  hashtagsList <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_hashtags_list.rds"))
+  trendingHashtags <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_trending_hashtags_list.rds"))
+  lang <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_lang_list.rds"))
+  EPGroupShort <- readRDS(file = file.path("qf_data", "tweets_processed", "EPGroupShort.rds"))
+  countries <- readRDS(file = file.path("qf_data", "tweets_processed", "countries.rds"))
+  palettes <- readRDS(file = file.path("qf_data", "tweets_processed", "palettes.rds"))
   
   
   shiny::shinyApp(ui = shinydashboard::dashboardPage(
@@ -257,7 +257,26 @@ qf_wordcloud_app <- function(shiny_port = 3939,  shiny_host = "0.0.0.0") {
   
   server = function(input, output, session) {
     
-    
+    if (dataset_global_file_time < fs::file_info(path = fs::path("qf_data", "tweets_processed", "dataset.rds")) %>% 
+        dplyr::pull(modification_time)) {
+      
+      dataset <- readRDS(file = file.path("qf_data", "tweets_processed", "dataset.rds"))
+      hashtagsList <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_hashtags_list.rds"))
+      trendingHashtags <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_trending_hashtags_list.rds"))
+      lang <- readRDS(file = file.path("qf_data", "tweets_processed", "tweets_lang_list.rds"))
+      EPGroupShort <- readRDS(file = file.path("qf_data", "tweets_processed", "EPGroupShort.rds"))
+      countries <- readRDS(file = file.path("qf_data", "tweets_processed", "countries.rds"))
+      palettes <- readRDS(file = file.path("qf_data", "tweets_processed", "palettes.rds"))
+      
+      langTable <- dplyr::left_join(x = tibble::tibble(lang = unlist(lang)),
+                                    y = readRDS(file.path("qf_data", "tweets_processed", "langCode.rds")) %>% rename(lang = alpha2), by = "lang") %>% 
+        mutate(English = stringr::str_extract(string = English, pattern = regex("[[:alnum:]]+")))
+      
+      
+      
+    }
+  
+
     randomString <- stringi::stri_rand_strings(n=1, length=16)
     
     #### Reset ####
@@ -288,7 +307,7 @@ qf_wordcloud_app <- function(shiny_port = 3939,  shiny_host = "0.0.0.0") {
     currentDataset <- reactive({
       # filter date
       if (input$dateRangeRadio=="Last week") {
-        dataset <-  dataset %>% 
+        dataset <- dataset %>% 
           filter(date>Sys.Date()-7)
       } else if (input$dateRangeRadio=="Last month") {
         dataset <-  dataset %>% 
@@ -772,7 +791,7 @@ qf_wordcloud_app <- function(shiny_port = 3939,  shiny_host = "0.0.0.0") {
                 group_by(lang) %>% 
                 count(word, sort = TRUE) %>% 
                 add_tally(wt = n) %>% 
-                arrange(desc(nn)) %>% 
+                arrange(desc(n)) %>% 
                 ungroup() %>% 
                 mutate(lang = factor(x = lang, levels = unique(lang)))
               
