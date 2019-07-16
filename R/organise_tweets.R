@@ -227,27 +227,27 @@ qf_create_trending_hashtag_list <- function() {
         dplyr::ungroup() %>% 
         dplyr::distinct(hashtagsLower, .keep_all = TRUE) %>% 
         dplyr::mutate(hashtagString = paste0("#", hashtags, " (", nMepPerHashtag, " MEPs, ", nTotal, " tweets)"))
-    }
-    
-    ##  consider also how many MEPs
-    
-    
-    if (ncol(tempL)==3) {
-      tempL <- tempL %>% 
-        dplyr::mutate_if(is.numeric, dplyr::funs((. + 1) / sum(. + 1))) %>%
-        dplyr::mutate(logratio = log(New / Old)) %>%
-        dplyr::arrange(dplyr::desc(logratio)) %>% 
-        dplyr::transmute(hashtags, NewLog = logratio) %>% 
-        head(200) 
       
-      tempL <- dplyr::left_join(tempL, 
-                                currentHashtagsDF %>% dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
-                                by = "hashtags") %>% 
-        dplyr::arrange(dplyr::desc(NewLog*nMepPerHashtag)) %>% 
-        head(10) %>% 
-        dplyr::pull(hashtags)
+      ##  consider also how many MEPs
       
-      trending_hashtags[[i]] <- paste0("#", as.character(hashtags[[i]])[is.element(el = tolower(as.character(hashtags[[i]])), set = tempL)])
+      
+      if (ncol(tempL)==3) {
+        tempL <- tempL %>% 
+          dplyr::mutate_if(is.numeric, dplyr::funs((. + 1) / sum(. + 1))) %>%
+          dplyr::mutate(logratio = log(New / Old)) %>%
+          dplyr::arrange(dplyr::desc(logratio)) %>% 
+          dplyr::transmute(hashtags, NewLog = logratio) %>% 
+          head(200) 
+        
+        tempL <- dplyr::left_join(tempL, 
+                                  currentHashtagsDF %>% dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
+                                  by = "hashtags") %>% 
+          dplyr::arrange(dplyr::desc(NewLog*nMepPerHashtag)) %>% 
+          head(10) %>% 
+          dplyr::pull(hashtags)
+        
+        trending_hashtags[[i]] <- paste0("#", as.character(hashtags[[i]])[is.element(el = tolower(as.character(hashtags[[i]])), set = tempL)])
+      }
     }
   }
   currentHashtagsDF <-  tweets_all %>% 
@@ -290,8 +290,8 @@ qf_create_trending_hashtag_list <- function() {
     dplyr::transmute(hashtags, NewLog = logratio) 
   
   temptrending_hashtags <- dplyr::left_join(temptrending_hashtags, 
-                                     currentHashtagsDF %>% dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
-                                     by = "hashtags") %>% 
+                                            currentHashtagsDF %>% dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
+                                            by = "hashtags") %>% 
     dplyr::arrange(dplyr::desc(NewLog*nMepPerHashtag)) %>% 
     head(10) %>% 
     dplyr::pull(hashtags)
