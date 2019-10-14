@@ -1,29 +1,44 @@
 ---
 title: "European Parliament"
 author: "Giorgio Comai"
-date: "7/6/2019"
+date: "2019-10-14"
 output: html_document
 ---
 
 
 ```{r}
-
+if(!require(pacman)) install.packages("pacman")
 pacman::p_load("tidyverse")
 pacman::p_load("XML")
 
 remotes::install_github("giocomai/castarter")
 ```
 
+This document outlines an approach for getting basic information about all members of the European Parliament (MEPs). The data collected will then be fed to the Quote Finder. 
+
+First, let's get the list of all MEPs, provided by the European Parliament in a [convenient xml format](http://www.europarl.europa.eu/meps/en/full-list/xml).
 
 ```{r}
-all_MEPs <- XML::xmlToDataFrame(doc = "http://www.europarl.europa.eu/meps/en/full-list/xml", stringsAsFactors = FALSE)
+all_MEPs <- XML::xmlToDataFrame(doc = "http://www.europarl.europa.eu/meps/en/full-list/xml",
+                                stringsAsFactors = FALSE)
+
 ```
+
+There are the fields provided:
 
 ```{r}
 colnames(all_MEPs)
 ```
 
+And this is how the actual data looks like:
+
 ```{r}
+pander::pander(head(all_MEPs))
+```
+
+This is useful information, but we still do not have reference to their social media accounts, which are instead given on the individual page of each of them. They can be extracted from there, even if some minor data cleaning is needed. 
+
+```{r message = FALSE}
 library("castarter")
 
 SetCastarter(project = "ep", website = "meps")
@@ -33,11 +48,15 @@ DownloadContents(links = index_links, type = "index")
 ```
 
 ```{r}
-fullName <- ExtractTitles(container = "span", containerClass = "ep_name erpl-member-card-full-member-name", htmlLocation = fs::path("castarter", "ep", "meps", "IndexHtml"))
+fullName <- ExtractTitles(container = "span",
+                          containerClass = "ep_name erpl-member-card-full-member-name", htmlLocation = fs::path("castarter", "ep", "meps", "IndexHtml"))
 
 twitter_urls <- 
-  purrr::map_chr(.x = seq_along(fullName), .f = function (x) {
-    temp <- ExtractLinks(container = "div", containerClass = "ep-p_text link_twitt", id = x)
+  purrr::map_chr(.x = seq_along(fullName),
+                 .f = function (x) {
+    temp <- ExtractLinks(container = "div",
+                         containerClass = "ep-p_text link_twitt",
+                         id = x)
     if (length(temp)==0) {
       NA
     } else {
@@ -45,60 +64,85 @@ twitter_urls <-
     }
   })
 
-twitter_urls <- 
-twitter_urls %>% str_remove(pattern = "\\?.*") %>% str_replace(pattern = "http://@", replacement = "https://twitter.com/") %>% str_replace(pattern = "https://www.twitter.com/", replacement = "https://twitter.com/") %>% str_replace(pattern = "http://www.twitter.com/", replacement = "https://twitter.com/") %>% str_remove(pattern = "/$")
+twitter_urls <- twitter_urls %>%
+  str_remove(pattern = "\\?.*") %>%
+  str_replace(pattern = "http://@",
+              replacement = "https://twitter.com/") %>%
+  str_replace(pattern = "https://www.twitter.com/",
+              replacement = "https://twitter.com/") %>%
+  str_replace(pattern = "http://www.twitter.com/",
+              replacement = "https://twitter.com/") %>%
+  str_remove(pattern = "/$")
 
 
 twitter_urls[str_detect(string = twitter_urls, pattern = "www.facebook.com")&is.na(twitter_urls)==FALSE] <- NA
 ```
 
+Now, as it's both more common and more practical to refer to EP groups by the shortened version of their name, we'll need to match the long version provided on the official website with the standard short version. 
 
-```{r}
+
+```{r ep_groups}
 groups <- tibble::tribble(~GroupLong, ~GroupShort,
-"Group of the European People's Party (Christian Democrats)", "EPP",
-"Non-attached Members", "NA",
-"Identity and Democracy Group", "ID",
-"Group of the Progressive Alliance of Socialists and Democrats in the European Parliament", "S&D",
-"European Conservatives and Reformists Group", "ECR",
-"Group of the Greens/European Free Alliance", "Greens–EFA",
-"Renew Europe Group", "RE",
-"Confederal Group of the European United Left - Nordic Green Left", "GUE-NGL"
+                          "Group of the European People's Party (Christian Democrats)", "EPP",
+                          "Non-attached Members", "NA",
+                          "Identity and Democracy Group", "ID",
+                          "Group of the Progressive Alliance of Socialists and Democrats in the European Parliament", "S&D",
+                          "European Conservatives and Reformists Group", "ECR",
+                          "Group of the Greens/European Free Alliance", "Greens–EFA",
+                          "Renew Europe Group", "RE",
+                          "Confederal Group of the European United Left - Nordic Green Left", "GUE-NGL"
 )
+
+pander::pander(groups)
 ```
 
 ```{r}
 readr::write_rds(x = as.list(groups$GroupShort), path = "EPGroupShort.rds")
 ```
 
+It's now time to combine all these data in tabular format to facilitate further use.
 
 
 ```{r}
 all_MEPs_group_twitter <- 
   all_MEPs %>% 
-  left_join(y = tibble::tibble(twitter_urls = twitter_urls, fullName = fullName), by = "fullName")  %>% 
+  left_join(y = tibble::tibble(twitter_urls = twitter_urls,
+                               fullName = fullName),
+            by = "fullName")  %>% 
   mutate(officialURL = paste0("https://www.europarl.europa.eu/meps/en/", id)) %>% 
-  mutate(screen_name = str_remove(string = twitter_urls, pattern = "https://twitter.com/")) %>% 
-  left_join(y = groups %>% dplyr::rename(politicalGroup=GroupLong), by = "politicalGroup")
+  mutate(screen_name = str_remove(string = twitter_urls,
+                                  pattern = "https://twitter.com/")) %>% 
+  left_join(y = groups %>%
+              dplyr::rename(politicalGroup=GroupLong),
+            by = "politicalGroup")
 ```
 
-Add those who have been added to the Twitter list of Press service, but whose Twitter account is not listed on the EP official website
+For some reason, a few MEPs do not have their account listed on their own webpage on the EP website, but they have been included in the relevant Twitter list created by the EP's press service. 
+
+We can include their handle to this list.
 
 ```{r}
 all_MEPs_group_twitter$screen_name[all_MEPs_group_twitter$fullName=="Belinda DE LUCY"] <- "BelindadeLucy"
 
 all_MEPs_group_twitter$screen_name[all_MEPs_group_twitter$fullName=="Rupert LOWE"] <- "rupertlowe10"
 
-```
-```{r}
 all_MEPs_group_twitter <- all_MEPs_group_twitter %>% 
   mutate(screen_name_lower = tolower(screen_name))
 ```
 
+It is now possible to store these data for reference.
 
 
 ```{r}
-readr::write_rds(x = all_MEPs_group_twitter, path = "all_MEPs_group_twitter.rds")
-readr::write_csv(x = all_MEPs_group_twitter, path = "all_MEPs_group_twitter.csv")
+readr::write_rds(x = all_MEPs_group_twitter,
+                 path = "all_MEPs_group_twitter.rds")
+readr::write_csv(x = all_MEPs_group_twitter,
+                 path = "all_MEPs_group_twitter.csv")
 ```
+
+```{r}
+pander::pander(all_MEPs_group_twitter)
+```
+
 
 

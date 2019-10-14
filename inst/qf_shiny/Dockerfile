@@ -49,7 +49,6 @@ RUN R -e 'remotes::install_cran("magrittr")'
 RUN R -e 'remotes::install_cran("shiny")'
 RUN R -e 'remotes::install_cran("tidytext")'
 RUN R -e 'remotes::install_cran("wordcloud")'
-RUN R -e 'remotes::install_cran("wordcloud2")'
 RUN R -e 'remotes::install_cran("reshape2")'
 RUN R -e 'remotes::install_cran("stopwords")'
 RUN R -e 'remotes::install_cran("syuzhet")'
@@ -58,11 +57,12 @@ RUN R -e 'remotes::install_cran("shinyWidgets")'
 RUN R -e 'remotes::install_cran("RColorBrewer")'
 RUN R -e 'remotes::install_cran("shinycustomloader")'
 RUN R -e 'remotes::install_cran("readr")'
+
+RUN R -e 'remotes::install_github(repo = "Lchiffon/wordcloud2")'
+
 RUN R -e 'remotes::install_cran("webshot")'
 
 RUN R -e 'webshot::install_phantomjs()'
-
-RUN R -e 'remotes::install_github(repo = "Lchiffon/wordcloud2")'
 
 RUN R -e 'remotes::install_github(repo = "giocomai/edjnetquotefinder")'
 

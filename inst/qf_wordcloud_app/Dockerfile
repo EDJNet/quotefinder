@@ -5,6 +5,8 @@ RUN apt-get update && apt-get install -y \
 
 RUN apt-get install -y pandoc
 
+RUN apt-get install -y wget curl lbzip2
+
 RUN R -e 'install.packages("remotes")'
 
 RUN R -e 'remotes::install_cran("dplyr")'
@@ -34,6 +36,7 @@ RUN R -e 'remotes::install_cran("shinyWidgets")'
 RUN R -e 'remotes::install_cran("RColorBrewer")'
 RUN R -e 'remotes::install_cran("shinycustomloader")'
 RUN R -e 'remotes::install_cran("readr")'
+RUN R -e 'remotes::install_cran("curl")'
 RUN R -e 'remotes::install_cran("webshot")'
 
 RUN R -e 'webshot::install_phantomjs()'
