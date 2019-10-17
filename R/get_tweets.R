@@ -193,7 +193,7 @@ qf_get_tweets_from_list <- function(list_id = NULL,
       dplyr::arrange(created_at)
     saveRDS(object = tweets_from_list,
             file = fs::path(today_folder,
-                            paste0(Sys.time(), "-", "list_id.rds")))
+                            paste0(Sys.time(), "-", list_id, ".rds")))
   } else {
     for (i in 1:100) {
       previous_tweets <- readRDS(file = local_tweets_location[length(local_tweets_location)+1-i])
