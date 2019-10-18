@@ -16,11 +16,12 @@ Sys.time()
 ```
 
 ```{r}
-all_members_id <- fs::dir_ls("tweets_by_user") %>% 
+all_users_id <- fs::dir_ls("tweets_by_user") %>% 
   fs::path_file() %>% 
   fs::path_ext_remove()
 
-qf_bind_rows_tweets(users = all_members_id,lists = 1138737420671885312)
+qf_bind_rows_tweets(users = all_users_id,
+                    lists = 1184769179712397312)
 ```
 
 ```{r}
@@ -59,7 +60,10 @@ allMEPtweetsDF <- allMEPtweetsDF %>% dplyr::filter(stringr::str_detect(string = 
 allMEPtweetsDF$clean_text <- stringr::str_replace_all(string = allMEPtweetsDF$clean_text, pattern = stringr::fixed("&amp;"), replacement = "&") 
 allMEPtweetsDF$clean_text <- stringr::str_replace_all(string = allMEPtweetsDF$clean_text, pattern = stringr::fixed("&gt;"), replacement = " ")
 allMEPtweetsDF$clean_text <- stringr::str_replace_all(string = allMEPtweetsDF$clean_text, pattern = stringr::fixed("&lt;"), replacement = " ") 
+
 allMEPtweetsDF$Link <- paste0("<a href='https://twitter.com/", allMEPtweetsDF$screen_name, "/status/", allMEPtweetsDF$status_id, "'  target='_blank'>Source</a>")
+
+allMEPtweetsDF$full_name <- paste0("<a href='", officialURL, "'  target='_blank'>", allMEPtweetsDF$fullName, "</a>")
 
 ```
 
