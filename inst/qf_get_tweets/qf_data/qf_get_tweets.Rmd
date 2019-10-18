@@ -20,8 +20,8 @@ twitter_token <- readRDS(file = "twitter_token.rds")
 
 
 ```{r gettweets}
-qf_get_tweets_from_list(slug = "meps-2019-2024",
-                        owner_user = "EuroParlPress",
+qf_get_tweets_from_list(slug = "current-meps",
+                        owner_user = "EDJQuoteFinder",
                         n = 3200,
                         include_rts = FALSE,
                         twitter_token = twitter_token)
@@ -29,11 +29,14 @@ qf_get_tweets_from_list(slug = "meps-2019-2024",
 
 
 ```{r}
-all_members <- rtweet::lists_members(1138737420671885312, token = twitter_token)
+all_meps <- rtweet::lists_members(1184769179712397312, token = twitter_token)
 ```
 
 
 ```{r}
-qf_get_tweets_by_user(users = all_members$user_id, n = 3200, wait = 300, twitter_token = twitter_token)
+qf_get_tweets_by_user(users = sample(x = all_meps$user_id, size = 10),
+                      n = 3200, 
+                      wait = 300,
+                      twitter_token = twitter_token)
 ```
 
