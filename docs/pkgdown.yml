@@ -1,0 +1,9 @@
+pandoc: 2.3.1
+pkgdown: 1.4.1
+pkgdown_sha: ~
+articles:
+  dockerising: dockerising.html
+  edjnetquotefinder: edjnetquotefinder.html
+  european_parliament: european_parliament.html
+  retrieving_tweets: retrieving_tweets.html
+
