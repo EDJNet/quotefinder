@@ -12,58 +12,76 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+library("quotefinder")
 ```
 
 
 The easiest way to extract tweets regualarly and deploy a shiny app that facilitates exploring them is to use a server and run services with Docker. 
 
-In order to facilitate the process, `edjnetquotefinder` comes with dedicated and customisable Docker containers. 
-
-```{r echo=TRUE}
-
-
-```
+In order to facilitate the process, `quotefinder` comes with dedicated and customisable Docker containers. 
 
 # Getting the tweets
 
 After having a server running, with Docker enabled, and having created a user with the rights to run docker containers, you should create a folder, called `qf_data`. At this stage, the folder should contain three files:
 
-1. an R file, with the sole purpose of running a rmarkdown document. The full content of the file can be as follows `rmarkdown::render(input = "/home/qf/qf_data/qf_get_tweets.Rmd")`. [See example](https://github.com/giocomai/edjnetquotefinder/blob/master/inst/qf_get_tweets/qf_data/qf_get_tweets.R).
+1. an R file, with the sole purpose of running a rmarkdown document. The full content of the file can be as follows `rmarkdown::render(input = "/home/qf/qf_data/qf_get_tweets.Rmd")`. [See example](https://github.com/giocomai/quotefinder/blob/master/inst/qf_get_tweets/qf_data/qf_get_tweets.R).
 
-1. an rmarkdown file ([see example](https://github.com/giocomai/edjnetquotefinder/blob/master/inst/qf_get_tweets/qf_data/qf_get_tweets.Rmd)). It will likely be a basic document, which may just include a call to `qf_get_tweets_from_list()` or similar function. 
+1. an rmarkdown file ([see example](https://github.com/giocomai/quotefinder/blob/master/inst/qf_get_tweets/qf_data/qf_get_tweets.Rmd)). It will likely be a basic document, which may just include a call to `qf_get_tweets_from_list()` or similar function. 
 
 1. a twitter token, stored e.g. as `twitter_token.rds`.
 
 An rmarkdown file is, of course, not stricly speaking necessary, but I find it makes it much easier to deal with issues such as folder locations, and allows to detail subsequent steps in an ordered fashion, no matter how complicated the procedure at hand. The R file can of course include calls to more than one rmarkdown files if this feels easier to manage. If useful, rmarkdown output files can be stored locally as a form of logging.
 
-To get started, on a host from the terminal run the following commands:
 
-```{r, engine = 'bash', eval = FALSE}
-mkdir qf_data
-cd qf_data
-wget https://raw.githubusercontent.com/giocomai/edjnetquotefinder/master/inst/qf_get_tweets/qf_data/qf_get_tweets.R
-
-wget https://raw.githubusercontent.com/giocomai/edjnetquotefinder/master/inst/qf_get_tweets/qf_data/qf_get_tweets.Rmd
-
-wget https://raw.githubusercontent.com/giocomai/edjnetquotefinder/master/inst/qf_get_tweets/qf_data/create_token.Rmd
-
-```
-
-If you already have a twitter token, you can copy it to the relevant subfolder as `twitter_token.rds`, and skip to the next step. If not, now it's the right time to create one. To do this, or simply to check that everything is in order, you may want to run an instance of rstudio server, preloaded with `edjnetquotefinder`.
-
-# Dockerised Rstudio with pre-loaded `edjnetquotefinder`
+# Dockerised Rstudio with pre-loaded `quotefinder`
 
 In order to check if everything is in order, you may want to have a look at your server in an interactive R session.
 
+Run this command if you prefer to keep files in your user directory on the server.
 ```{r, engine = 'bash', eval = FALSE}
+mkdir qf_data
 docker run --rm -p 28788:8787 -v $HOME/qf_data:/home/qf/qf_data -e USER=qf -e PASSWORD=ies5EshaiPh6 --name qf_rstudio giocomai/qf_rstudio 
 ```
 
-N.B. keep qf as the user, but do change password! `ies5EshaiPh6` is just a random string. You can change the port where to make available Rstudio by changing the first part of `28788:8787` in the command above (add `-d` if you want this rstudio session to continue running).
+Or run this command to use Docker volumes
+
+```{r, engine = 'bash', eval = FALSE}
+docker run --rm -p 28788:8787 -v qf_data:/home/qf/qf_data -e USER=qf -e PASSWORD=ies5EshaiPh6 --name qf_rstudio giocomai/qf_rstudio 
+```
+
+N.B. keep qf as the user, but do change password! `ies5EshaiPh6` is just a random string. You can change the port where to make available Rstudio by changing the first part of `28788:8787` in the command above (add `-d` if you want this rstudio session to continue running). The Dockerfile used to create this image [is available on GitHub](https://github.com/giocomai/quotefinder/blob/master/inst/qf_rstudio/Dockerfile).
 
 You can then access the rstudio session using the ip (or the domain name) associated with your host, like http://123.123.123.123:28788
 
-If you haven't yet created a Twitter token, you can do so by opening the `create_token.Rmd` file that you should find in the `qf_data` folder.
+In order to get some example files, you can download them to the `qf_data` folder by running these data in the newly opened Rstudio session in your browser.
+
+```{r eval = FALSE}
+download.file(url = "https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/qf_get_tweets.R",
+              destfile = "qf_data/qf_get_tweets.R")
+
+download.file(url = "https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/qf_get_tweets.Rmd",
+              destfile = "qf_data/qf_get_tweets.Rmd")
+
+download.file(url = "https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/qf_pre_process_tweets.Rmd",
+                destfile = "qf_data/qf_pre_process_tweets.Rmd")
+
+download.file(url = "https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/create_token.Rmd",
+              destfile = "qf_data/create_token.Rmd")
+
+```
+
+```{r eval = FALSE}
+qf_get_tweets_from_list(slug = "current-meps",
+                        owner_user = "EDJQuoteFinder",
+                        n = 32,
+                        include_rts = FALSE,
+                        twitter_token = twitter_token)
+```
+
+
+
+If you already have a twitter token, you can copy it to the `qf_data`  subfolder as `twitter_token.rds`. If not, now it's the right time to create one. You can do so by opening the `create_token.Rmd` file that you should find in the `qf_data` folder.
 
 At this stage, you can customise the `qf_get_tweets.Rmd` to download the tweets you are interested in. 
 
@@ -116,7 +134,7 @@ If you are unfamiliar with cron, in order to customise frequency and time consid
 
 
 ```{r setup}
-library(edjnetquotefinder)
+library(quotefinder)
 ```
 
 ```{r eval = FALSE}

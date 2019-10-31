@@ -22,9 +22,9 @@ qf_bind_rows_tweets <- function(users = NULL,
     lists <- purrr::map_dbl(.x = lists, .f = function(x) {
       if (stringr::str_detect(string = x, pattern = "/")) {
         extracted <- stringr::str_split(string = x, pattern = "/", simplify = TRUE)
-        as.numeric(edjnetquotefinder::qf_find_list_id(slug = extracted[[2]],
-                                                      owner_user = extracted[[1]],
-                                                      twitter_token = twitter_token))
+        as.numeric(quotefinder::qf_find_list_id(slug = extracted[[2]],
+                                                owner_user = extracted[[1]],
+                                                twitter_token = twitter_token))
       } else {
         as.numeric(x)
       }

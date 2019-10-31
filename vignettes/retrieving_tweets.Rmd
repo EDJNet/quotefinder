@@ -1,0 +1,64 @@
+---
+title: "Retrieving tweets"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{retrieving_tweets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+```{r setup}
+library("quotefinder")
+library("rtweet")
+library("dplyr")
+
+twitter_token <- readRDS(file = "twitter_token.rds")
+```
+
+
+There are three main ways to retrieve tweets using Twitter's API:
+
+1. get tweets from a single user (or many users, asking one by one)
+1. get tweets from a list of users
+1. get tweets from the streaming APIs, e.g. by searching for a keyword or hashtag
+
+By itself, the excellent `rtweet` package commonly used to interact with the Twitter APIs with R, does not provide convenience functions to cache and store tweets, leaving this to the user. 
+
+The present `quotefinder` package provides such functions in order to facilitate collecting and pre-processing tweets in order to feed them to the QuoteFinder app. All retrieved tweets are stored in dated local sub-folders.
+
+## Getting tweets by user 
+
+The following command will download all available tweets for the given users and store them locally. If they have been previously downloaded, it will download only newer tweets. 
+
+```{r getting_tweets, eval=FALSE}
+qf_get_tweets_by_user(users = c("Europarl_EN", "EuroParlPress"),
+                      twitter_token = twitter_token)
+
+```
+
+
+## Getting tweets from lists
+
+When there is a need to collect regularly tweets from hundreds or thousands of users, this approach quickly becomes impractical, as it is easier to hit the limits allowed by Twitter APIs. 
+
+An easy solution is to create a list of users, and then make a single request to get recent tweets for all accounts included in the list.^[It is easy to create new lists by using `rtweet`s `post_list()` function.] 
+
+
+```{r}
+qf_get_tweets_from_list(slug = "current-meps",
+                        owner_user = "EDJQuoteFinder",
+                        n = 3200,
+                        include_rts = FALSE,
+                        twitter_token = twitter_token)
+```
+
+
+

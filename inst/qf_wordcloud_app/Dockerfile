@@ -42,7 +42,7 @@ RUN R -e 'remotes::install_cran("webshot")'
 RUN R -e 'webshot::install_phantomjs()'
 
 RUN R -e 'remotes::install_github(repo = "Lchiffon/wordcloud2")'
-RUN R -e 'remotes::install_github("giocomai/edjnetquotefinder")'
+RUN R -e 'remotes::install_github("edjnet/quotefinder")'
 
 EXPOSE 3939
-CMD R -e "edjnetquotefinder::qf_wordcloud_app(shiny_port = 3939)"
+CMD R -e "quotefinder::qf_wordcloud_app(shiny_port = 3939)"

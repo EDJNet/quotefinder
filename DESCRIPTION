@@ -1,6 +1,6 @@
-Package: edjnetquotefinder
+Package: quotefinder
 Title: EDJNet's QuoteFinder
-Version: 0.0.0.9000
+Version: 0.0.0.9002
 Authors@R: person('Giorgio', 'Comai', email = 'g@giorgiocomai.eu', role = c('cre', 'aut'))
 Description: EDJNet's QuoteFinder. Facilitates finding different takes on European affairs.
 License: GPL-3
@@ -19,9 +19,9 @@ Imports:
     readr,
     tidytext
 RoxygenNote: 6.1.1
-URL: https://github.com/giocomai/edjnetquotefinder
-BugReports: https://github.com/giocomai/edjnetquotefinder/issues
-Suggests: 
+URL: https://github.com/edjnet/quotefinder
+BugReports: https://github.com/edjnet/quotefinder/issues
+Suggests:
     knitr,
     rmarkdown,
     testthat (>= 2.1.0)

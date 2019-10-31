@@ -7,3 +7,4 @@ $run_dev.*
 ^LICENSE\.md$
 ^README\.Rmd$
 ^Dockerfile$
+^/home/g/Nextcloud/R_nc/edjnetquotefinder/Dockerfile$

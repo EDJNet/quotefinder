@@ -6,7 +6,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-library("edjnetquotefinder")
+library("quotefinder")
 
 twitter_token <- readRDS(file = "twitter_token.rds")
 ```
@@ -40,36 +40,44 @@ qf_create_trending_hashtag_list()
 
 
 ```{r}
-allMEPtweetsDF <- readr::read_rds(path = fs::path("tweets_processed", "tweets_all.rds")) %>% 
+if (fs::file_exists("all_MEPs_full.csv")==FALSE) {
+  download.file(url = "https://raw.githubusercontent.com/giocomai/edjnetquotefinder/master/vignettes/all_MEPs_full.csv",
+                destfile = "all_MEPs_full.csv")
+}
+all_MEPs_full <- readr::read_csv(file = "all_MEPs_full.csv")
+```
+
+
+
+```{r}
+all_MEPs_tweets_df <- readr::read_rds(path = fs::path("tweets_processed", "tweets_all.rds")) %>% 
   dplyr::arrange(dplyr::desc(created_at)) %>%
   dplyr::rename(time = created_at) %>% 
-  dplyr::select(screen_name, date, time, text, status_id, retweet_count, favorite_count, lang, hashtags, urls_expanded_url) %>% 
-  dplyr::mutate(screen_name_lower = tolower(screen_name)) %>% 
-  dplyr::left_join(y = readr::read_rds(fs::path("tweets_processed", "all_MEPs_group_twitter.rds")) %>% dplyr::select(-screen_name), by = "screen_name_lower") 
-
-
+  dplyr::mutate(user_id = as.numeric(user_id)) %>% 
+  dplyr::select(screen_name, date, time, text, status_id, retweet_count, favorite_count, lang, hashtags, urls_expanded_url, user_id) %>% 
+  dplyr::left_join(y = all_MEPs_full %>% dplyr::select(-screen_name), by = "user_id") 
 
 ```
 
 ```{r}
 ## clean text
-allMEPtweetsDF$clean_text <- stringr::str_replace_all(
-  string = allMEPtweetsDF$text,
+all_MEPs_tweets_df$clean_text <- stringr::str_replace_all(
+  string = all_MEPs_tweets_df$text,
   pattern = stringr::regex(pattern = "@\\w+|#[[:alnum:]]+|http[[:graph:]]+|RT ", ignore_case = FALSE), replacement = "")
-allMEPtweetsDF <- allMEPtweetsDF %>% dplyr::filter(stringr::str_detect(string = clean_text, pattern = stringr::fixed(pattern = "retweeted", ignore_case = TRUE))==FALSE)
-allMEPtweetsDF$clean_text <- stringr::str_replace_all(string = allMEPtweetsDF$clean_text, pattern = stringr::fixed("&amp;"), replacement = "&") 
-allMEPtweetsDF$clean_text <- stringr::str_replace_all(string = allMEPtweetsDF$clean_text, pattern = stringr::fixed("&gt;"), replacement = " ")
-allMEPtweetsDF$clean_text <- stringr::str_replace_all(string = allMEPtweetsDF$clean_text, pattern = stringr::fixed("&lt;"), replacement = " ") 
+all_MEPs_tweets_df <- all_MEPs_tweets_df %>% dplyr::filter(stringr::str_detect(string = clean_text, pattern = stringr::fixed(pattern = "retweeted", ignore_case = TRUE))==FALSE)
+all_MEPs_tweets_df$clean_text <- stringr::str_replace_all(string = all_MEPs_tweets_df$clean_text, pattern = stringr::fixed("&amp;"), replacement = "&") 
+all_MEPs_tweets_df$clean_text <- stringr::str_replace_all(string = all_MEPs_tweets_df$clean_text, pattern = stringr::fixed("&gt;"), replacement = " ")
+all_MEPs_tweets_df$clean_text <- stringr::str_replace_all(string = all_MEPs_tweets_df$clean_text, pattern = stringr::fixed("&lt;"), replacement = " ") 
 
-allMEPtweetsDF$Link <- paste0("<a href='https://twitter.com/", allMEPtweetsDF$screen_name, "/status/", allMEPtweetsDF$status_id, "'  target='_blank'>Source</a>")
+all_MEPs_tweets_df$Link <- paste0("<a href='https://twitter.com/", all_MEPs_tweets_df$screen_name, "/status/", all_MEPs_tweets_df$status_id, "'  target='_blank'>Source</a>")
 
-allMEPtweetsDF$full_name <- paste0("<a href='", officialURL, "'  target='_blank'>", allMEPtweetsDF$fullName, "</a>")
+all_MEPs_tweets_df$full_name <- paste0("<a href='", officialURL, "'  target='_blank'>", all_MEPs_tweets_df$fullName, "</a>")
 
 ```
 
 ```{r}
 
-readr::write_rds(x = allMEPtweetsDF, 
+readr::write_rds(x = all_MEPs_tweets_df, 
                  path = fs::path("tweets_processed", "dataset.rds"))
   
 ```

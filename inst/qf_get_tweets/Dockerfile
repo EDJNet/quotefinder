@@ -12,7 +12,6 @@ RUN R -e 'remotes::install_cran("rmarkdown")'
 RUN R -e 'remotes::install_cran("shiny")'
 RUN R -e 'remotes::install_cran("dplyr")'
 RUN R -e 'remotes::install_cran("tidyr")'
-RUN R -e 'remotes::install_cran("rtweet")'
 RUN R -e 'remotes::install_cran("stringr")'
 RUN R -e 'remotes::install_cran("fs")'
 RUN R -e 'remotes::install_cran("DT")'
@@ -22,6 +21,7 @@ RUN R -e 'remotes::install_cran("magrittr")'
 RUN R -e 'remotes::install_cran("readr")'
 RUN R -e 'remotes::install_cran("tidytext")'
 
-RUN R -e 'remotes::install_github("giocomai/edjnetquotefinder")'
+RUN R -e 'remotes::install_github("giocomai/rtweet")'
+RUN R -e 'remotes::install_github("edjnet/quotefinder")'
 
 CMD Rscript /home/qf/qf_data/qf_get_tweets.R

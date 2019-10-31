@@ -1,1 +1,1 @@
-edjnetquotefinder:::app_ui()
+quotefinder:::app_ui()

@@ -1,4 +1,4 @@
-FROM rocker/r-ver:3.6.0
+FROM rocker/r-ver:3.6.1
 
 RUN apt-get update && apt-get install -y \
 sudo \
@@ -62,12 +62,20 @@ RUN R -e 'remotes::install_github(repo = "Lchiffon/wordcloud2")'
 
 RUN R -e 'remotes::install_cran("webshot")'
 
-RUN R -e 'webshot::install_phantomjs()'
+RUN R -e 'remotes::install_github(repo = "edjnet/quotefinder")'
 
-RUN R -e 'remotes::install_github(repo = "giocomai/edjnetquotefinder")'
+RUN apt-get install build-essential chrpath libssl-dev libxft-dev -y
+RUN apt-get install libfreetype6 libfreetype6-dev -y
+RUN apt-get install libfontconfig1 libfontconfig1-dev -y
+RUN wget https://github.com/Medium/phantomjs/releases/download/v2.1.1/phantomjs-2.1.1-linux-x86_64.tar.bz2
+RUN tar xvjf phantomjs-2.1.1-linux-x86_64.tar.bz2
+RUN mv phantomjs-2.1.1-linux-x86_64 /usr/local/share
+RUN ln -sf /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin
+RUN chmod +x /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs
+RUN phantomjs --version
 
 EXPOSE 3838
 
-COPY shiny-server.sh /usr/bin/shiny-server.sh
+COPY  shiny-server.sh /usr/bin/shiny-server.sh
 
 CMD ["/usr/bin/shiny-server.sh"]

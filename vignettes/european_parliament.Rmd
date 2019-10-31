@@ -1,12 +1,12 @@
 ---
-title: "European Parliament"
+title: "Getting information about Members of the European Parliament"
 author: "Giorgio Comai"
 date: "2019-10-14"
 output: html_document
 ---
 
 
-```{r}
+```{r message=FALSE}
 if(!require(pacman)) install.packages("pacman")
 pacman::p_load("tidyverse")
 pacman::p_load("XML")
@@ -64,6 +64,18 @@ twitter_urls <-
     }
   })
 
+facebook_urls <- purrr::map_chr(.x = seq_along(fullName),
+                 .f = function (x) {
+    temp <- ExtractLinks(container = "div",
+                         containerClass = "ep-p_text link_fb",
+                         id = x)
+    if (length(temp)==0) {
+      NA
+    } else {
+      temp[[1]]
+    }
+  })
+
 twitter_urls <- twitter_urls %>%
   str_remove(pattern = "\\?.*") %>%
   str_replace(pattern = "http://@",
@@ -107,6 +119,7 @@ It's now time to combine all these data in tabular format to facilitate further 
 all_MEPs_group_twitter <- 
   all_MEPs %>% 
   left_join(y = tibble::tibble(twitter_urls = twitter_urls,
+                               faceboook_urls = facebook_urls, 
                                fullName = fullName),
             by = "fullName")  %>% 
   mutate(officialURL = paste0("https://www.europarl.europa.eu/meps/en/", id)) %>% 
@@ -117,32 +130,111 @@ all_MEPs_group_twitter <-
             by = "politicalGroup")
 ```
 
-For some reason, a few MEPs do not have their account listed on their own webpage on the EP website, but they have been included in the relevant Twitter list created by the EP's press service. 
-
-We can include their handle to this list.
+Does this adequately capture all the MEPs who are on Twitter?
 
 ```{r}
-all_MEPs_group_twitter$screen_name[all_MEPs_group_twitter$fullName=="Belinda DE LUCY"] <- "BelindadeLucy"
-
-all_MEPs_group_twitter$screen_name[all_MEPs_group_twitter$fullName=="Rupert LOWE"] <- "rupertlowe10"
-
-all_MEPs_group_twitter <- all_MEPs_group_twitter %>% 
-  mutate(screen_name_lower = tolower(screen_name))
+all_MEPs_group_twitter %>% 
+  mutate(`On Twitter` = is.na(twitter_urls)==FALSE) %>% 
+  group_by(`On Twitter`) %>% 
+  count() %>% 
+  pander::pander()
 ```
+
+Unfortunately, not quite: more than 300 MEPs have not included information on their Twitter account on their official page on the website of the European Parliament, perhaps preferring to give more visibility to their Facebook account or for other unknown reasons. 
+
+Where else would it be possible to find a complete list of MEPs on Twitter?
+
+The [EP's Newshub](www.epnewshub.eu/) collects information from social media accounts of MEPs and other EP-related figures, but does not seem to offer anything like an actual list of accounts. 
+
+The press service of the European Parliament conveniently offers a [Twitter list of MEPs](https://twitter.com/EuroParlPress/lists/meps-2019-2024) of current MEPs. 
+
+
+```{r message = FALSE}
+library("rtweet")
+
+twitter_token <- readRDS(file = "twitter_token.rds")
+
+if (fs::file_exists("mep_df.rds")==FALSE) {
+  mep_df <- rtweet::lists_members(slug = "meps-2019-2024",
+                                  owner_user = "EuroParlPress",
+                                  token = twitter_token)
+  saveRDS(object = mep_df, file = "mep_df")
+} else {
+  mep_df <- readRDS(file = "mep_df.rds")
+}
+
+```
+
+
+The list includes `r nrow(mep_df)` MEPs, including about a hundred that did not list their account on the official website of the EP. It seems likely, however, that this is not yet a complete list.
+
+```{r}
+eliflab_meps <- read_csv(file = "https://raw.githubusercontent.com/eliflab/European-Parliament-Open-Data/master/meps_full_list_with_twitter_accounts.csv") 
+```
+
+[Eliflab](https://github.com/eliflab/European-Parliament-Open-Data) maintains a nicely formatted list of MEPs on Twitter, which includes the Twitter account of `r nrow(eliflab_meps)` MEPs. 
+
+By matching these three sources, and after some manual checks, it is possible to reach a reasonably complete and updated coverage of MEPs who are on Twitter.
+
+## Creating a list
+
+While it is possible to request tweets for each user, to facilitate regular collection of tweets from a relatively large number of users such as in this case it is probably easier to create a Twitter list with all relevant users, and then ask Twitter for new tweets in that list (rather than ask ~600 times for each individual MEP).
+
+```{r eval=FALSE}
+all_mep_handles <- read_csv(file = "https://raw.githubusercontent.com/giocomai/European-Parliament-Open-Data/master/meps_full_list_with_twitter_accounts.csv") %>% filter(is.na(SCREEN_NAME)==FALSE) %>% pull(SCREEN_NAME) %>% str_remove(pattern = "@") 
+
+post_list(users = all_mep_handles,
+          name = "current_meps",
+          description = "Current MEPs on Twitter",
+          token = twitter_token)
+
+
+```
+
+The Twitter list is now available at the following link:
+https://twitter.com/EdjQuoteFinder/lists/current-meps
+
+# Get back some data from Twitter
+
+The problem is that, as anyone who has been analysing twitter for a while will know, Twitter users can change their handle. And many MEPs do it, for different reasons: some add "MEP" at the end of their handle, some "EU", some include some other reference to their political affiliation, or remove something that was ok during the campaign but does not sound serious enough once elected.
+
+To facilitate consistent pairing of the MEP with a Twitter profile, it is useful to retrieve the unchangeable numeric user id that Twitter assigns to every user.
+
+```{r}
+qf_twitter_list <- rtweet::lists_members(slug = "current-meps",
+                                         owner_user = "EDJQuoteFinder",
+                                         token = twitter_token)
+
+write_rds(x = qf_twitter_list, path = "qf_twitter_list.rds")
+```
+
+
+
+# Have all these data together
+
+```{r}
+all_MEPs_eliflab <- read_csv(file = "https://raw.githubusercontent.com/giocomai/European-Parliament-Open-Data/master/meps_full_list_with_twitter_accounts.csv") %>% 
+  select(NAME, TWITTER_URL, SCREEN_NAME) %>% 
+  mutate(screen_name = str_remove(SCREEN_NAME, "@")) %>% 
+  rename(fullName = NAME) %>% 
+  select(-SCREEN_NAME,-TWITTER_URL)
+
+all_MEPs_full <- all_MEPs_group_twitter %>% 
+  select(-screen_name) %>% 
+  left_join(all_MEPs_eliflab, by = "fullName") %>% 
+  left_join(qf_twitter_list %>% select(user_id, screen_name), by = "screen_name")
+```
+
+
 
 It is now possible to store these data for reference.
 
 
 ```{r}
-readr::write_rds(x = all_MEPs_group_twitter,
-                 path = "all_MEPs_group_twitter.rds")
-readr::write_csv(x = all_MEPs_group_twitter,
-                 path = "all_MEPs_group_twitter.csv")
+readr::write_rds(x = all_MEPs_full,
+                 path = "all_MEPs_full.rds")
+readr::write_csv(x = all_MEPs_full,
+                 path = "all_MEPs_full.csv")
 ```
 
-```{r}
-pander::pander(all_MEPs_group_twitter)
-```
-
-
-
+[You can download them in csv format](all_MEPs_full.csv).
