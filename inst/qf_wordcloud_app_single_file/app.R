@@ -95,9 +95,7 @@ ui = shinydashboard::dashboardPage(
   ),
   dashboardBody(
     tags$head(HTML('<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>')),
-    
     #  wc2ClickedWord(cloudOutputId = "wordcloud2", inputId = "selected_word"),
-    
     tabItems(
       
       ##### TwitterMEP tab ####

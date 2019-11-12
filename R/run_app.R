@@ -2,6 +2,9 @@
 #'
 #' @export
 #' @importFrom shiny runApp
-run_app <- function() {
-  shiny::runApp(system.file("app", package = "quotefinder"))
+qf_dashboard <- function(path) {
+  # https://github.com/rstudio/shiny/issues/440
+  .GlobalEnv$.quotefinder.path <- path
+  on.exit(rm(.quotefinder.path, envir=.GlobalEnv))
+  shiny::runApp(appDir = system.file("app", package = "quotefinder"))
 }
