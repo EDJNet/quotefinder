@@ -4,8 +4,13 @@
 \alias{qf_find_list_id}
 \title{Fin the ID of Twitter lists.}
 \usage{
-qf_find_list_id(slug, owner_user, cache_lists = TRUE,
-  overwrite_lists = FALSE, twitter_token = NULL)
+qf_find_list_id(
+  slug,
+  owner_user,
+  cache_lists = TRUE,
+  overwrite_lists = FALSE,
+  twitter_token = NULL
+)
 }
 \arguments{
 \item{cache_lists}{Logical, defaults to TRUE. If TRUE, stores locally the lists owned by a given user, in a subfolder `lists_by_user`. If list has already been downloaded, it just loads it. To overwrite, set `overwrite` to TRUE.}

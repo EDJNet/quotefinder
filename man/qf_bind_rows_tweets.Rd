@@ -4,9 +4,15 @@
 \alias{qf_bind_rows_tweets}
 \title{Create a single data frame from a vector of Twitter handles}
 \usage{
-qf_bind_rows_tweets(users = NULL, lists = NULL, since = Sys.Date() -
-  31, include_rts = FALSE, add_date_column = TRUE, save = TRUE,
-  twitter_token = NULL)
+qf_bind_rows_tweets(
+  users = NULL,
+  lists = NULL,
+  since = Sys.Date() - 31,
+  include_rts = FALSE,
+  add_date_column = TRUE,
+  save = TRUE,
+  twitter_token = NULL
+)
 }
 \arguments{
 \item{users}{A character vector of handles or id of Twitter users.}
