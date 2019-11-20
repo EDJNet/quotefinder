@@ -251,18 +251,24 @@ app_server <- function(input, output,session) {
         )
       )
     } else {
-      colourInput(inputId = "colourMost", label = "Colour for most frequent terms", value = "#08306B", showColour = "both")
+      colourInput(inputId = "colourMost", label = "Colour for most frequent terms", value = "#6B2A8C", showColour = "both")
     } 
   })
   
   output$colourLeast_UI <- renderUI({
     if (input$sentimentL=="Sentiment by word") {
-      colourInput(inputId = "colourNegative", label = "Colour for negative terms", value = "#F8766D", showColour = "both")
+      colourInput(inputId = "colourNegative",
+                  label = "Colour for negative terms",
+                  value = "#F8766D",
+                  showColour = "both")
     } else if (input$anyLanguage==TRUE&input$colourLanguage==TRUE) {
       # leave empty
     }
     else {
-      colourInput(inputId = "colourLeast", label = "Colour for least frequent terms", value = "#4292C6", showColour = "both")  
+      colourInput(inputId = "colourLeast",
+                  label = "Colour for least frequent terms",
+                  value = "#8F5CA8",
+                  showColour = "both")  
     }
   })
   

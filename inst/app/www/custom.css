@@ -2,9 +2,41 @@
   background-color: white;
 }
 
-
 .skin-purple .main-header .navbar {
   background-color: #a6ce39;
 }
 
+.skin-purple .main-header .navbar .sidebar-toggle:hover {
+  background-color: #6b2a8c;
+}
 
+a:active, a:focus, a:hover {
+  color: #a6ce39;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+a {
+  color: #6B2A8C;
+  font-weight: bold;
+}
+
+.bg-blue {
+  background-color: #a6ce39 !important;
+}
+
+.irs-bar {
+  border-top: 1px solid #a6ce39;
+  border-bottom: 1px solid #a6ce39;
+  background: #a6ce39;
+}
+
+.irs-from, .irs-to, .irs-single {
+  background: #a6ce39;
+}
+
+
+.irs-bar-edge {
+  border: 1px solid #a6ce39;
+  background: #a6ce39;
+}
