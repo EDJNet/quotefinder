@@ -3,13 +3,15 @@
 #' Imports and cleans RSS files from [http://emm.newsbrief.eu/]
 #'
 #' @param languages A character vector of one or more languages as two letter codes (e.g. "en").
-#' @param shuffle Logical, defaults to TRUE. If TRUE, order in which languages are processed is randomised.  
+#' @param shuffle Logical, defaults to TRUE. If TRUE, order in which languages are processed is randomised.
+#' @param keep_xml Logical, defaults to FALSE. If TRUE, removes the xml file downloaded from EMM newsbrief.
 #' @return Nothing, used for its side effects. 
 #' @examples
 #' 
 #' @export
 
 qf_get_emm_newsbrief <- function(languages = c("ar","bg","cs","da","de","el","en","es", "et","fi","fr","hr", "hu","it", "lt","lv","nl","pl","pt","ro","ru", "sk","sl","sv","sw","tr","zh"),
+                                 keep_xml = TRUE,
                                  shuffle = TRUE) {
   
   if (shuffle==TRUE) {
@@ -57,7 +59,9 @@ qf_get_emm_newsbrief <- function(languages = c("ar","bg","cs","da","de","el","en
                                              name = purrr::map(.x = entL, .f = attr, which = "name") %>% as.character())
       }
       
-      
+      if (keep_xml == FALSE) {
+        fs::file_delete(path = xml_location)
+      }
       saveRDS(object = rss_df, file = xml_location %>%
                 stringr::str_replace(pattern = stringr::fixed(".xml"),
                                      replacement = ".rds"))
@@ -77,7 +81,7 @@ qf_get_emm_newsbrief <- function(languages = c("ar","bg","cs","da","de","el","en
 #' @examples
 #' 
 #' @export
-qf_extract_keywords <- function(language = NULL,
+qf_emm_extract_keywords <- function(language = NULL,
                                 date = NULL,
                                 n = Inf,
                                 store = TRUE) {
@@ -93,7 +97,9 @@ qf_extract_keywords <- function(language = NULL,
   for (i in language) {
     
     if (is.null(date)) {
-      date <- fs::dir_ls(path = fs::path("emm_newsbrief", i), recurse = FALSE, type = "directory") %>% 
+      date <- fs::dir_ls(path = fs::path("emm_newsbrief", i),
+                         recurse = FALSE,
+                         type = "directory") %>% 
         fs::path_file()
     }
     
@@ -110,9 +116,13 @@ qf_extract_keywords <- function(language = NULL,
         
         keywords <- all_news %>% 
           dplyr::transmute(title, Date = as.Date(pubDate)) %>%
-          tidytext::unnest_tokens(input = title, output = "words") %>% 
-          dplyr::anti_join(tibble::tibble(words = stopwords::stopwords(language = i, source = "stopwords-iso")), by = "words") %>% # elimina stopwords
-          dplyr::filter(!stringr::str_detect(string = words, pattern = "[[:digit:]]")) %>%  # togliere i numeri registrati come parole
+          tidytext::unnest_tokens(input = title,
+                                  output = "words") %>% 
+          dplyr::anti_join(tibble::tibble(words = stopwords::stopwords(language = i,
+                                                                       source = "stopwords-iso")),
+                           by = "words") %>% # elimina stopwords
+          dplyr::filter(!stringr::str_detect(string = words,
+                                             pattern = "[[:digit:]]")) %>%  # togliere i numeri registrati come parole
           dplyr::group_by(words) %>% 
           dplyr::count(sort = TRUE) %>% 
           head(n) 
@@ -124,10 +134,92 @@ qf_extract_keywords <- function(language = NULL,
           fs::dir_create(path = keywords_base_path)
           saveRDS(object = keywords,
                   file = fs::path(keywords_base_path,
-                                  paste0(j, "-keywords_", n, "_", i, ".rds")))
+                                  paste0(j,
+                                         "-keywords_",
+                                         n,
+                                         "_",
+                                         i,
+                                         ".rds")))
         }
       }
     }
   }
   invisible(keywords)
+}
+
+
+
+#' Extract most frequently used entities in emm newsbrief items
+#'
+#' @param language A character vector of language two letter codes. Defaults to NULL. If NULL, processes available languages.
+#' @param days An integer. How many days back in time should be considered, starting from today (0 means today only, 1 means yesterday, etc.)
+#' @param date Only news downloaded in the given date will be considered. Defaults to all available dates.
+#' @param n An integer. Number of entities to keep. Defaults to `Inf` (i.e. keeps all entities, ordered by frequency).
+#' @return A data.frame (a tibble) with `n` number of rows and two columns, `words` and `n` for number of occurrences.
+#' @examples
+#' 
+#' @export
+qf_emm_extract_entities <- function(language = NULL,
+                                    days = NULL,
+                                    date = NULL,
+                                    n = Inf,
+                                    store = TRUE) {
+  
+
+  
+  if (is.null(language)) {
+    language <-  fs::dir_ls(path = fs::path("emm_newsbrief"),
+                            recurse = FALSE,
+                            type = "directory") %>% 
+      fs::path_file()
+  }
+  
+  lang_date_combo <-
+    purrr::map_dfr(.x = language,
+                   .f = function(x) {
+                     tibble::tibble(language = x,
+                                    date = 
+                                      fs::dir_ls(path = fs::path("emm_newsbrief", x),
+                                                 recurse = FALSE,
+                                                 type = "directory") %>% 
+                                      fs::path_file() %>% 
+                                      base::as.Date())
+                   })
+  
+  
+  if (is.null(date)==FALSE) {
+    lang_date_combo <- lang_date_combo %>% 
+      dplyr::filter(date == as.Date(date))
+  }
+  
+  if (is.null(days)==FALSE) {
+    lang_date_combo <- lang_date_combo %>% 
+      dplyr::filter(date >= Sys.Date()-days)
+  }
+  
+  
+  all_files <- fs::dir_ls(path = fs::path(fs::path("emm_newsbrief", lang_date_combo$language, lang_date_combo$date)),
+                          recurse = FALSE,
+                          type = "file",
+                          glob = "*.rds")
+  
+  
+  all_feeds <- purrr::map_dfr(.x = all_files,
+                              .f = function(x) {
+                                readr::read_rds(x) %>% 
+                                  dplyr::select(pubDate, entity, link)
+                                },
+                              .id = "source") %>% 
+    dplyr::distinct(link, .keep_all = TRUE) %>% 
+    dplyr::select(-link)
+  
+  entities <- all_feeds %>%
+    dplyr::transmute(date=as.Date(pubDate),
+                     language=fs::path_dir(all_feeds$source) %>% fs::path_dir() %>% fs::path_file(),
+                     entity) %>% 
+    tidyr::unnest(cols = entity) %>% 
+    dplyr::group_by(date, language, id, name) %>% 
+    dplyr::count(sort = TRUE) %>% 
+    dplyr::ungroup() %>% 
+    head(n) 
 }

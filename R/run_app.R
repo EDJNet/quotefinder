@@ -8,3 +8,4 @@ qf_dashboard <- function(path) {
   on.exit(rm(.quotefinder.path, envir=.GlobalEnv))
   shiny::runApp(appDir = system.file("app", package = "quotefinder"))
 }
+  
