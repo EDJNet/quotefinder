@@ -1,5 +1,5 @@
 #' @import shiny
-app_server <- function(input, output,session) {
+  app_server <- function(input, output,session) {
   output$letters <- renderText(paste(head(tweets$screen_name), collapse = ", "))
   output$bla <- shiny::renderText("bla")
   
@@ -739,13 +739,17 @@ app_server <- function(input, output,session) {
   
   #### DataTable ####
   
-  output$table <- DT::renderDataTable({
+  output$table <- DT::renderDT({
     DT::datatable(data = currentDataset() %>% 
                     arrange(desc(time))%>%
                     select(full_name, screen_name, date, text, Link, GroupShort) %>% 
                     #head(10000) %>% 
                     rename(`Full name` = full_name, `Twitter handle` = screen_name, Date = date, Tweet = text, `EP Group` = "GroupShort"),
-                  escape = FALSE, options = list(pageLength = 4, lengthMenu = c(3, 4, 5, 10, 15, 20)), rownames=FALSE)
+                  escape = FALSE,
+                  filter = "top",
+                  options = list(pageLength = 4,
+                                 lengthMenu = c(3, 4, 5, 10, 15, 20)),
+                  rownames=FALSE)
   })
   
   ### InfoBox ####
@@ -839,36 +843,37 @@ app_server <- function(input, output,session) {
   
   ###### end of wordcloud app ##########
   
-  
-  tsGG <- shiny::eventReactive(input$go, {
-    if (input$freq=="Absolute frequency") {
+  #### castarter section #########
+  tsGG <- shiny::reactive(x = {
+    if (input$freq=="Number of mentions per day") {
       castarter::ShowAbsoluteTS(terms = as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))),
-                                dataset = dataset,
+                                dataset = castarter_dataset,
                                 type = "graph",
-                                rollingAverage = input$rollingAverage,
+                                rollingDays = input$rollingDays,
                                 startDate = input$dateRange[1],
                                 endDate = input$dateRange[2])
       
     } else if (input$freq=="Relative frequency") {
       castarter::ShowRelativeTS(terms = as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))),
-                                dataset = dataset,
+                                dataset = castarter_dataset,
                                 type = "graph",
-                                rollingAverage = input$rollingAverage,
+                                rollingType = tolower(input$rollingType),
+                                rollingDays = input$rollingDays,
                                 startDate = input$dateRange[1],
                                 endDate = input$dateRange[2])
     }
   })
   
   output$freqPlot <- shiny::renderPlot({
-    if (input$go==0) {
-      
-    } else {
+    # if (input$go==0) {
+    #   
+    # } else {
       tsGG()
-    }
+    # }
   })
   
-  kwic_react <- shiny::eventReactive(input$go, {
-    temp <- dataset %>%
+  kwic_react <- shiny::reactive(x = {
+    temp <- castarter_dataset %>%
       dplyr::filter(date>input$dateRange[1], date<input$dateRange[2]) %>%
       dplyr::filter(stringr::str_detect(string = sentence,
                                         pattern = stringr::regex(ignore_case = TRUE,
@@ -895,20 +900,21 @@ app_server <- function(input, output,session) {
   })
   
   # Renders table at the bottom of the main tab
-  output$kwic <- DT::renderDataTable(expr = kwic_react(),
+  output$kwic <- DT::renderDT(expr = kwic_react(),
                                      server = TRUE,
-                  options = list(pageLength = 3,
+                  options = list(pageLength = 5,
                                  lengthMenu = c(3, 5, 10, 15, 20)),
                   escape = FALSE,
-                  rownames = FALSE)
+                  rownames = FALSE,
+                  filter = "top")
   
   output$dateRangeInput_UI <- renderUI({shiny::dateRangeInput(inputId = "dateRange",
                                                               label = "Date range",
-                                                              start = min(dataset$date),
-                                                              end = max(dataset$date),
+                                                              start = min(castarter_dataset$date),
+                                                              end = max(castarter_dataset$date),
                                                               weekstart = 1)})
 
-  
+  #### end of castarter section #########
   #  tweets_r <- callModule(mod_qf_show_tweets_server, "qf_show_tweets_ui_1", tweets_r)
   # List the first level callModules here
 }

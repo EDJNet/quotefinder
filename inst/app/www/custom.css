@@ -35,8 +35,11 @@ a {
   background: #a6ce39;
 }
 
-
 .irs-bar-edge {
   border: 1px solid #a6ce39;
   background: #a6ce39;
+}
+
+.sidebar-menu > li {
+  margin-bottom: 10px;
 }

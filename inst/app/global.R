@@ -19,7 +19,7 @@ library("shinycustomloader")
 library("DT")
 library("webshot")
 
-
+# qf data
 dataset <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "dataset.rds"))
 hashtagsList <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "tweets_hashtags_list.rds"))
 trendingHashtags <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "tweets_trending_hashtags_list.rds"))
@@ -27,6 +27,9 @@ lang <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed"
 EPGroupShort <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "EPGroupShort.rds"))
 countries <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "countries.rds"))
 palettes <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "palettes.rds"))
+# castarter dataset
+castarter_dataset <- readRDS(file = file.path(.quotefinder.path,"qf_data", "castarter_dataset", "castarter_dataset.rds"))
+
 
 langTable <- left_join(x = tibble::tibble(lang = unlist(lang)),
                        y = readRDS(file.path(.quotefinder.path, "qf_data", "tweets_processed", "langCode.rds")) %>%
