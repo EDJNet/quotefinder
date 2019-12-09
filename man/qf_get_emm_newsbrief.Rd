@@ -5,15 +5,16 @@
 \title{Get current news in multiple languages from EMM newsbrief}
 \usage{
 qf_get_emm_newsbrief(
-  languages = c("ar", "bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "hr",
-    "hu", "it", "lt", "lv", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "sw", "tr",
-    "zh"),
+  languages = "all",
+  category_id = "rtn",
   keep_xml = TRUE,
   shuffle = TRUE
 )
 }
 \arguments{
-\item{languages}{A character vector of one or more languages as two letter codes (e.g. "en").}
+\item{languages}{A character vector of one or more languages as two letter codes (e.g. "en"). "all", the dafault, includes all available languages. Current available languages are: `c("ar","bg","cs","da","de","el","en","es", "et","fi","fr","hr", "hu","it", "lt","lv","nl","pl","pt","ro","ru", "sk","sl","sv","sw","tr","zh")`}
+
+\item{category_id}{A character vector of length 1, defaults to "rtn" (default category with all contents). The id for separate categories can be derived from the URL of the given section, e.g. for EC news the id is "ECnews".}
 
 \item{keep_xml}{Logical, defaults to FALSE. If TRUE, removes the xml file downloaded from EMM newsbrief.}
 
