@@ -129,6 +129,11 @@ If you are unfamiliar with cron, in order to customise frequency and time consid
 # Run the app
 
 
+## Add EMM newsbrief
+
+```{bash eval = FALSE}
+0 * * * * docker run --rm -v $HOME/qf_data:/home/qf/qf_data giocomai/qf_get_emm_newsbrief:latest >> $HOME/qf_data/qf_get_emm_newsbrief.log 2>&1
+```
 
 
 

@@ -1,0 +1,23 @@
+---
+title: "Get emm newsbrief"
+author: "Giorgio Comai"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library("quotefinder")
+```
+
+```{r time}
+Sys.time()
+```
+
+
+```{r emmnewsbrief}
+qf_get_emm_newsbrief(category_id = "ECnews",
+                     keep_xml = FALSE)
+```
+
+
+
