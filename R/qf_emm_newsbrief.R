@@ -6,6 +6,8 @@
 #' @param category_id A character vector of length 1, defaults to "rtn" (default category with all contents). The id for separate categories can be derived from the URL of the given section, e.g. for EC news the id is "ECnews".
 #' @param shuffle Logical, defaults to TRUE. If TRUE, order in which languages are processed is randomised.
 #' @param keep_xml Logical, defaults to FALSE. If TRUE, removes the xml file downloaded from EMM newsbrief.
+#' @param store Logical, defaults to TRUE. If TRUE, it stores the data extracted from the xml as an rds file in a local subfolder, organised by language and date.
+#' @param store_only_new Logical, defaults to TRUE. Before storing outputs, it checks the previous file and keeps only articles published after the most recent article incldued in the previous post.
 #' @return Nothing, used for its side effects. 
 #' @examples
 #' 
@@ -14,7 +16,9 @@
 qf_get_emm_newsbrief <- function(languages = "all",
                                  category_id = "rtn",
                                  keep_xml = TRUE,
-                                 shuffle = TRUE) {
+                                 shuffle = TRUE,
+                                 store = TRUE, 
+                                 store_only_new = TRUE) {
   
   if (shuffle==TRUE) {
     languages <- sample(languages)
@@ -58,32 +62,79 @@ qf_get_emm_newsbrief <- function(languages = "all",
                                source = character(nrows_rss), 
                                entity = list(nrows_rss))
       
-      for (i in 1:nrows_rss) {
-        temp <- xml2_list %>% magrittr::extract2(i)
+      for (j in 1:nrows_rss) {
+        temp <- xml2_list %>% magrittr::extract2(j)
         
-        rss_df$title[i] <- temp$title %>% as.character()
-        rss_df$language[i] <- temp$language %>% as.character()
-        rss_df$link[i] <- temp$link %>% as.character()
-        rss_df$description[i] <- temp$description %>% as.character()
-        rss_df$pubDate[i] <- temp$pubDate %>% as.character() %>% base::strptime("%a, %d %b %Y %H:%M:%S %z")
-        rss_df$source[i] <- temp$source %>% as.character()
+        rss_df$title[j] <- temp$title %>% as.character()
+        rss_df$language[j] <- temp$language %>% as.character()
+        rss_df$link[j] <- temp$link %>% as.character()
+        rss_df$description[j] <- temp$description %>% as.character()
+        rss_df$pubDate[j] <- temp$pubDate %>% as.character() %>% base::strptime("%a, %d %b %Y %H:%M:%S %z")
+        rss_df$source[j] <- temp$source %>% as.character()
         entL <- temp[names(temp)=="entity"] 
-        rss_df$entity[[i]] <- tibble::tibble(id = purrr::map(.x = entL, .f = attr, which = "id") %>% as.numeric, 
+        rss_df$entity[[j]] <- tibble::tibble(id = purrr::map(.x = entL, .f = attr, which = "id") %>% as.numeric, 
                                              name = purrr::map(.x = entL, .f = attr, which = "name") %>% as.character())
       }
       
       if (keep_xml == FALSE) {
         fs::file_delete(path = xml_location)
       }
-      saveRDS(object = rss_df,
-              file = xml_location %>%
-                stringr::str_replace(pattern = stringr::fixed(".xml"),
-                                     replacement = ".rds"))
       
+      if (store == TRUE) {
+        if (store_only_new == TRUE) {
+          #check the most recent post of the previous stored file
+          
+          link_to_previous <- fs::dir_info(path = fs::path("emm_newsbrief", i),
+                       recurse = TRUE,
+                       glob = "*.rds") %>% 
+            dplyr::arrange(dplyr::desc(modification_time)) %>% 
+            dplyr::slice(1) %>% 
+            dplyr::pull(path)
+           if (length(link_to_previous)>0) {
+             for (k in 1:102) {
+               previous <- readr::read_rds(path = fs::dir_info(path = fs::path("emm_newsbrief", i),
+                                                               recurse = TRUE,
+                                                               glob = "*.rds") %>% 
+                                             dplyr::arrange(dplyr::desc(modification_time)) %>% 
+                                             dplyr::slice(k) %>% 
+                                             dplyr::pull(path))
+               if(nrow(previous)>0) {
+                 break
+               }
+               if(k==102) {
+                 warning("There are over empty 100 files stored from the given feed, you may want to check if there is any issue.")
+               }
+             }
+             
+             max_previous_time <- previous %>% 
+               dplyr::pull(pubDate) %>% 
+               max()
+             
+             saveRDS(object = dplyr::anti_join(x = rss_df %>% 
+                                                 dplyr::filter(pubDate>=max_previous_time),
+                                               y = previous %>% 
+                                                 dplyr::filter(pubDate>=max_previous_time),
+                                               by = "link") %>% 
+                       dplyr::distinct(link, .keep_all = TRUE),
+                     file = xml_location %>%
+                       stringr::str_replace(pattern = stringr::fixed(".xml"),
+                                            replacement = ".rds"))
+           } else {
+             saveRDS(object = rss_df,
+                     file = xml_location %>%
+                       stringr::str_replace(pattern = stringr::fixed(".xml"),
+                                            replacement = ".rds"))
+           }
+
+        } else {
+          saveRDS(object = rss_df,
+                  file = xml_location %>%
+                    stringr::str_replace(pattern = stringr::fixed(".xml"),
+                                         replacement = ".rds"))
+        }
+      }
     }
-    
   }
-  
 }
 
 #' Extract most frequently used words from news titles 
