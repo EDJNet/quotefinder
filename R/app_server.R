@@ -844,23 +844,58 @@
   
   #### castarter section #########
   tsGG <- shiny::reactive(x = {
+    terms <- as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE))))
     if (input$freq=="Number of mentions per day") {
-      castarter::ShowAbsoluteTS(terms = as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))),
-                                dataset = castarter_dataset,
-                                type = "graph",
-                                rollingDays = input$rollingDays,
-                                startDate = input$dateRange[1],
-                                endDate = input$dateRange[2])
+      df <- castarter::ShowAbsoluteTS(terms = terms,
+                                      dataset = castarter_dataset,
+                                      type = "data.frame",
+                                      rollingDays = input$rollingDays,
+                                      rollingType = tolower(input$rollingType), 
+                                      startDate = input$dateRange[1],
+                                      endDate = input$dateRange[2])
+
+      graph <- df %>%
+        tidyr::gather(word, nRoll, 2:sum(length(terms),1)) %>%
+        ggplot2::ggplot(mapping = ggplot2::aes(x = Date, y = nRoll, color = word)) +
+        ggplot2::geom_line(size = 1.5) +
+        ggplot2::scale_y_continuous(name = "", breaks = scales::pretty_breaks(n = 5), labels = function(n){format(n, scientific = FALSE)}) +
+        ggplot2::scale_x_date(name = "", breaks = scales::pretty_breaks(n = 10)) +
+        ggplot2::expand_limits(y = 0) +
+        ggplot2::theme_minimal() +
+        ggplot2::theme(legend.title=ggplot2::element_blank(),
+                       legend.text = element_text(size = 16, family = "Roboto"),
+                       axis.text = element_text(size = 16, family = "Roboto"),
+                       text = element_text(size = 18, family = "Roboto")) +
+        ggplot2::scale_colour_viridis_d() +
+        ggplot2::labs(title = paste("Number of occurrences per day of", knitr::combine_words(terms, before = '`'), "on the website of ", knitr::combine_words(unique(castarter_dataset$website), before = "the ", after = "")),
+                      caption = paste0("Calculated on a ", input$rollingDays, "-days rolling ", input$rollingType))
       
     } else if (input$freq=="Relative frequency") {
-      castarter::ShowRelativeTS(terms = as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))),
+      df <- castarter::ShowRelativeTS(terms = as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))),
                                 dataset = castarter_dataset,
-                                type = "graph",
+                                type = "data.frame",
                                 rollingType = tolower(input$rollingType),
                                 rollingDays = input$rollingDays,
                                 startDate = input$dateRange[1],
                                 endDate = input$dateRange[2])
+      
+      graph <- df %>%
+        tidyr::gather(word, nRoll, 2:sum(length(terms),1)) %>%
+        ggplot2::ggplot(mapping = ggplot2::aes(x = Date, y = nRoll, color = word)) +
+        ggplot2::geom_line(size = 1.5) +
+        ggplot2::scale_y_continuous(name = "", breaks = scales::pretty_breaks(n = 5), labels = function(n){paste(format(n*100, scientific = FALSE), "%")}) +
+        ggplot2::scale_x_date(name = "", breaks = scales::pretty_breaks(n = 10)) +
+        ggplot2::expand_limits(y = 0) +
+        ggplot2::theme_minimal() +
+        ggplot2::theme(legend.title=ggplot2::element_blank(),
+                       legend.text = element_text(size = 16, family = "Roboto"),
+                       axis.text = element_text(size = 16, family = "Roboto"),
+                       text = element_text(size = 18, family = "Roboto")) +
+        ggplot2::scale_colour_viridis_d() +
+        ggplot2::labs(title = paste("Frequency of", knitr::combine_words(terms, before = '`'), "on the website of ", knitr::combine_words(unique(castarter_dataset$website), before = "the ", after = "")),
+                      caption = paste0("Calculated on a ", input$rollingDays, "-days rolling ", input$rollingType))
     }
+    graph
   })
   
   output$freqPlot <- shiny::renderPlot({
