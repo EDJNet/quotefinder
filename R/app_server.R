@@ -1,9 +1,7 @@
 #' @import shiny
   app_server <- function(input, output,session) {
   output$letters <- renderText(paste(head(tweets$screen_name), collapse = ", "))
-  output$bla <- shiny::renderText("bla")
-  
-  
+
   ##### Wordcloud app ########
   
   randomString <- stringi::stri_rand_strings(n=1, length=16)
@@ -747,7 +745,8 @@
                     rename(`Full name` = full_name, `Twitter handle` = screen_name, Date = date, Tweet = text, `EP Group` = "GroupShort"),
                   escape = FALSE,
                   filter = "top",
-                  options = list(pageLength = 4,
+                  options = list(dom = "lipt", 
+                    pageLength = 4,
                                  lengthMenu = c(3, 4, 5, 10, 15, 20)),
                   rownames=FALSE)
   })
@@ -902,7 +901,8 @@
   # Renders table at the bottom of the main tab
   output$kwic <- DT::renderDT(expr = kwic_react(),
                                      server = TRUE,
-                  options = list(pageLength = 5,
+                  options = list(dom = "lipt",
+                                 pageLength = 5,
                                  lengthMenu = c(3, 5, 10, 15, 20)),
                   escape = FALSE,
                   rownames = FALSE,
