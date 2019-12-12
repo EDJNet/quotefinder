@@ -19,6 +19,8 @@ library("shinycustomloader")
 library("DT")
 library("webshot")
 
+extrafont::loadfonts()
+
 # qf data
 dataset <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "dataset.rds"))
 hashtagsList <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "tweets_hashtags_list.rds"))
@@ -30,6 +32,7 @@ palettes <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_proces
 # castarter dataset
 castarter_dataset <- readRDS(file = file.path(.quotefinder.path,"qf_data", "castarter_dataset", "castarter_dataset.rds"))
 
+available_websites <- unique(castarter_dataset[["website"]])
 
 langTable <- left_join(x = tibble::tibble(lang = unlist(lang)),
                        y = readRDS(file.path(.quotefinder.path, "qf_data", "tweets_processed", "langCode.rds")) %>%

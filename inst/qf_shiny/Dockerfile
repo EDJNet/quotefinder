@@ -9,7 +9,9 @@ libcurl4-gnutls-dev \
 libcairo2-dev \
 libxt-dev \
 xtail \
-wget
+wget \
+fonts-roboto \
+fonts-roboto-fontface
 
 
 # Download and install shiny server
@@ -23,12 +25,19 @@ R -e "install.packages(c('shiny', 'rmarkdown'), repos='$MRAN')" && \
 cp -R /usr/local/lib/R/site-library/shiny/examples/* /srv/shiny-server/ && \
 chown shiny:shiny /var/lib/shiny-server
 
-
+RUN apt-get install build-essential chrpath libssl-dev libxft-dev -y
+RUN apt-get install libfreetype6 libfreetype6-dev -y
+RUN apt-get install libfontconfig1 libfontconfig1-dev -y
+RUN wget https://github.com/Medium/phantomjs/releases/download/v2.1.1/phantomjs-2.1.1-linux-x86_64.tar.bz2
+RUN tar xvjf phantomjs-2.1.1-linux-x86_64.tar.bz2
+RUN mv phantomjs-2.1.1-linux-x86_64 /usr/local/share
+RUN ln -sf /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin
+RUN chmod +x /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs
+RUN phantomjs --version
 
 RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev libssl-dev libxml2-dev
 
-RUN apt-get install -y pandoc
 
 RUN R -e 'install.packages("remotes")'
 
@@ -62,17 +71,12 @@ RUN R -e 'remotes::install_github(repo = "Lchiffon/wordcloud2")'
 
 RUN R -e 'remotes::install_cran("webshot")'
 
-RUN R -e 'remotes::install_github(repo = "edjnet/quotefinder")'
+RUN R -e 'remotes::install_cran("golem")'
 
-RUN apt-get install build-essential chrpath libssl-dev libxft-dev -y
-RUN apt-get install libfreetype6 libfreetype6-dev -y
-RUN apt-get install libfontconfig1 libfontconfig1-dev -y
-RUN wget https://github.com/Medium/phantomjs/releases/download/v2.1.1/phantomjs-2.1.1-linux-x86_64.tar.bz2
-RUN tar xvjf phantomjs-2.1.1-linux-x86_64.tar.bz2
-RUN mv phantomjs-2.1.1-linux-x86_64 /usr/local/share
-RUN ln -sf /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin
-RUN chmod +x /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs
-RUN phantomjs --version
+RUN R -e 'remotes::install_cran("extrafont")'
+
+RUN R -e 'remotes::install_github(repo = "giocomai/castarter")'
+RUN R -e 'remotes::install_github(repo = "edjnet/quotefinder")'
 
 EXPOSE 3838
 

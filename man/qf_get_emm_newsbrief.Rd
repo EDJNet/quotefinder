@@ -8,7 +8,9 @@ qf_get_emm_newsbrief(
   languages = "all",
   category_id = "rtn",
   keep_xml = TRUE,
-  shuffle = TRUE
+  shuffle = TRUE,
+  store = TRUE,
+  store_only_new = TRUE
 )
 }
 \arguments{
@@ -19,6 +21,10 @@ qf_get_emm_newsbrief(
 \item{keep_xml}{Logical, defaults to FALSE. If TRUE, removes the xml file downloaded from EMM newsbrief.}
 
 \item{shuffle}{Logical, defaults to TRUE. If TRUE, order in which languages are processed is randomised.}
+
+\item{store}{Logical, defaults to TRUE. If TRUE, it stores the data extracted from the xml as an rds file in a local subfolder, organised by language and date.}
+
+\item{store_only_new}{Logical, defaults to TRUE. Before storing outputs, it checks the previous file and keeps only articles published after the most recent article incldued in the previous post.}
 }
 \value{
 Nothing, used for its side effects.

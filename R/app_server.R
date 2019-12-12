@@ -352,6 +352,11 @@
   })
   
   
+  #### UI textual datasets ####
+  
+
+  
+  
   #### Wordcloud ####
   
   output$wordcloud <- renderPlot(expr = {
@@ -844,15 +849,17 @@
   
   #### castarter section #########
   tsGG <- shiny::reactive(x = {
+
     terms <- as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE))))
     if (input$freq=="Number of mentions per day") {
       df <- castarter::ShowAbsoluteTS(terms = terms,
-                                      dataset = castarter_dataset,
+                                      dataset = castarter_dataset %>% 
+                                        dplyr::filter(is.element(website, input$website_selector)),
                                       type = "data.frame",
                                       rollingDays = input$rollingDays,
                                       rollingType = tolower(input$rollingType), 
-                                      startDate = input$dateRange[1],
-                                      endDate = input$dateRange[2])
+                                      startDate = input$dateRange_castarter[1],
+                                      endDate = input$dateRange_castarter[2])
 
       graph <- df %>%
         tidyr::gather(word, nRoll, 2:sum(length(terms),1)) %>%
@@ -863,21 +870,22 @@
         ggplot2::expand_limits(y = 0) +
         ggplot2::theme_minimal() +
         ggplot2::theme(legend.title=ggplot2::element_blank(),
-                       legend.text = element_text(size = 16, family = "Roboto"),
-                       axis.text = element_text(size = 16, family = "Roboto"),
-                       text = element_text(size = 18, family = "Roboto")) +
+                       legend.text = element_text(size = 16, family = "Roboto Condensed"),
+                       axis.text = element_text(size = 16, family = "Roboto Condensed"),
+                       text = element_text(size = 16, family = "Roboto Condensed")) +
         ggplot2::scale_colour_viridis_d() +
-        ggplot2::labs(title = paste("Number of occurrences per day of", knitr::combine_words(terms, before = '`'), "on the website of ", knitr::combine_words(unique(castarter_dataset$website), before = "the ", after = "")),
-                      caption = paste0("Calculated on a ", input$rollingDays, "-days rolling ", input$rollingType))
+        ggplot2::labs(title = stringr::str_wrap(paste("Number of occurrences per day of", knitr::combine_words(terms, before = '`'), "on the website of ", knitr::combine_words(unique(castarter_dataset$website), before = "the ", after = ""))),
+                      caption = paste0("Calculated on a ", input$rollingDays, "-days rolling ", tolower(input$rollingType)))
       
     } else if (input$freq=="Relative frequency") {
       df <- castarter::ShowRelativeTS(terms = as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))),
-                                dataset = castarter_dataset,
+                                dataset = castarter_dataset %>% 
+                                  dplyr::filter(is.element(website, input$website_selector)),
                                 type = "data.frame",
                                 rollingType = tolower(input$rollingType),
                                 rollingDays = input$rollingDays,
-                                startDate = input$dateRange[1],
-                                endDate = input$dateRange[2])
+                                startDate = input$dateRange_castarter[1],
+                                endDate = input$dateRange_castarter[2])
       
       graph <- df %>%
         tidyr::gather(word, nRoll, 2:sum(length(terms),1)) %>%
@@ -888,11 +896,11 @@
         ggplot2::expand_limits(y = 0) +
         ggplot2::theme_minimal() +
         ggplot2::theme(legend.title=ggplot2::element_blank(),
-                       legend.text = element_text(size = 16, family = "Roboto"),
-                       axis.text = element_text(size = 16, family = "Roboto"),
-                       text = element_text(size = 18, family = "Roboto")) +
+                       legend.text = element_text(size = 16, family = "Roboto Condensed"),
+                       axis.text = element_text(size = 16, family = "Roboto Condensed"),
+                       text = element_text(size = 16, family = "Roboto Condensed")) +
         ggplot2::scale_colour_viridis_d() +
-        ggplot2::labs(title = paste("Frequency of", knitr::combine_words(terms, before = '`'), "on the website of ", knitr::combine_words(unique(castarter_dataset$website), before = "the ", after = "")),
+        ggplot2::labs(title = stringr::str_wrap(paste("Frequency of", knitr::combine_words(terms, before = '`'), "on the website of", knitr::combine_words(input$website_selector, before = "the ", after = ""))),
                       caption = paste0("Calculated on a ", input$rollingDays, "-days rolling ", input$rollingType))
     }
     graph
@@ -908,7 +916,8 @@
   
   kwic_react <- shiny::reactive(x = {
     temp <- castarter_dataset %>%
-      dplyr::filter(date>input$dateRange[1], date<input$dateRange[2]) %>%
+      dplyr::filter(is.element(website, input$website_selector)) %>% 
+      dplyr::filter(date>=input$dateRange_castarter[1], date<=input$dateRange_castarter[2]) %>%
       dplyr::filter(stringr::str_detect(string = sentence,
                                         pattern = stringr::regex(ignore_case = TRUE,
                                                                  pattern = paste(as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))), collapse = "|")))) %>%
@@ -917,6 +926,7 @@
       dplyr::select(Date, Source, Sentence) %>%
       dplyr::arrange(desc(Date))
     
+    # highlight string
     if (length(as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))))==1) {
       temp$Sentence <- purrr::map_chr(.x = temp$Sentence,
                                       .f = function (x)
@@ -943,7 +953,7 @@
                   rownames = FALSE,
                   filter = "top")
   
-  output$dateRangeInput_UI <- renderUI({shiny::dateRangeInput(inputId = "dateRange",
+  output$dateRangeInput_UI <- renderUI({shiny::dateRangeInput(inputId = "dateRange_castarter",
                                                               label = "Date range",
                                                               start = min(castarter_dataset$date),
                                                               end = max(castarter_dataset$date),
