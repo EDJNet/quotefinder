@@ -33,7 +33,7 @@ countries <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_proce
 palettes <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "palettes.rds"))
 # castarter dataset
 castarter_dataset <- readRDS(file = file.path(.quotefinder.path,"qf_data", "castarter_dataset", "castarter_dataset.rds"))
-
+ 
 available_websites <- unique(castarter_dataset[["website"]])
 
 langTable <- left_join(x = tibble::tibble(lang = unlist(lang)),

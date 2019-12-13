@@ -742,7 +742,7 @@
   
   #### DataTable ####
   
-  marker_table <- marker$new("#table")
+  marker_table <- marker::marker$new("#table")
   
   observeEvent(input$table_rows_current, {
     if (input$selectedHashtag=="All tweets") {
@@ -955,7 +955,7 @@
   
   # highlight terms in table
   
-  marker_kwic <- marker$new("#kwic")
+  marker_kwic <- marker::marker$new("#kwic")
   
   observeEvent(input$kwic_rows_current, {
     marker_kwic$
@@ -970,6 +970,24 @@
                                                               end = max(castarter_dataset$date),
                                                               weekstart = 1)})
 
+  wc2_eu_castarter <- reactive({
+    message(paste(Sys.time(), "WordcloudCastarter_eu", input$language, sep = "-"))
+    castarter_dataset %>% 
+      tidytext::unnest_tokens(output = "word", input = "sentence") %>% 
+      dplyr::count(word, sort = TRUE) %>% 
+      dplyr::anti_join(y = tidytext::stop_words, by = "word") %>% 
+      dplyr::anti_join(y = tibble::tibble(word = c("de", trimws(as.character(stringr::str_split(input$wordcloud_eu_castarter_custom_stopwords, pattern = ",",simplify = TRUE))))), by = "word") %>% 
+      head(input$MaxWords_castarter_eu)
+    })
+    
+  
+  output$wordcloud2_eu_castarter <- renderWordcloud2(
+    if (is.null(wc2())==FALSE) wc2_eu_castarter() %>%
+      wordcloud2(size = if (is.null(input$sizeVarWC2_castarter_eu)) 0.5 else input$sizeVarWC2_castarter_eu,
+                 fontFamily = "Roboto",
+                 color = "#6b2a8c"))
+  
+  
   #### end of castarter section #########
   #  tweets_r <- callModule(mod_qf_show_tweets_server, "qf_show_tweets_ui_1", tweets_r)
   # List the first level callModules here

@@ -232,7 +232,29 @@ app_ui <- function() {
                                                                                   height = "600px")
                                                               )
                                                 ),
-                                  shiny::fluidRow(DT::dataTableOutput(outputId = "kwic"))
+                                  shiny::fluidRow(DT::dataTableOutput(outputId = "kwic")),
+                                  shiny::fluidRow(shiny::column(width = 3, 
+                                                                shiny::sliderInput(inputId = "sizeVarWC2_castarter_eu",
+                                                                                   label = "Wordcloud size",
+                                                                                   min = 0.1, 
+                                                                                   max = 2,
+                                                                                   value = 0.5,
+                                                                                   sep = "."
+                                                                ),
+                                                                shiny::sliderInput(inputId = "MaxWords_castarter_eu",
+                                                                                   label = "Max number of words",
+                                                                                   min = 0L, 
+                                                                                   max = 1000L,
+                                                                                   value = 200L,
+                                                                                   sep = ".", width = "95%"
+                                                                ),
+                                                                shiny::textAreaInput(inputId = 'wordcloud_eu_castarter_custom_stopwords',
+                                                                                     label = 'Words to remove from wordcloud',
+                                                                                     value = "eu, european, commission, union, europe")),
+                                                  shiny::column(width = 9, 
+                                                                wordcloud2Output("wordcloud2_eu_castarter")))
+                                  
+
           )
           
         )
