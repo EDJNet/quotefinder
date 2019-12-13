@@ -930,16 +930,19 @@
   })
   
   kwic_react <- shiny::reactive(x = {
-    castarter_dataset %>%
-      dplyr::filter(is.element(website, input$website_selector)) %>% 
-      dplyr::filter(date>=input$dateRange_castarter[1], date<=input$dateRange_castarter[2]) %>%
-      dplyr::filter(stringr::str_detect(string = sentence,
-                                        pattern = stringr::regex(ignore_case = TRUE,
-                                                                 pattern = paste(as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))), collapse = "|")))) %>%
-      dplyr::mutate(Title = paste0("<a target='_blank' href='", link, "'>", title, "</a><br />")) %>%
-      dplyr::rename(Sentence = sentence, Date = date, Source = website) %>%
-      dplyr::select(Date, Source, Title, Sentence) %>%
-      dplyr::arrange(desc(Date))
+    
+    if (length(input$website_selector)>0&is.null(input$dateRange_castarter[2])==FALSE&is.null(input$dateRange_castarter[1])==FALSE) {
+      castarter_dataset %>%
+        dplyr::filter(is.element(website, input$website_selector)) %>% 
+        dplyr::filter(date>=input$dateRange_castarter[1], date<=input$dateRange_castarter[2]) %>%
+        dplyr::filter(stringr::str_detect(string = sentence,
+                                          pattern = stringr::regex(ignore_case = TRUE,
+                                                                   pattern = paste(as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))), collapse = "|")))) %>%
+        dplyr::mutate(Title = paste0("<a target='_blank' href='", link, "'>", title, "</a><br />")) %>%
+        dplyr::rename(Sentence = sentence, Date = date, Source = website) %>%
+        dplyr::select(Date, Source, Title, Sentence) %>%
+        dplyr::arrange(desc(Date))
+    }
   })
   
   # Renders table at the bottom of the main tab

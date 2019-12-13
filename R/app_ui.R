@@ -238,7 +238,7 @@ app_ui <- function() {
                                                                                    label = "Wordcloud size",
                                                                                    min = 0.1, 
                                                                                    max = 2,
-                                                                                   value = 0.5,
+                                                                                   value = 0.4,
                                                                                    sep = "."
                                                                 ),
                                                                 shiny::sliderInput(inputId = "MaxWords_castarter_eu",
