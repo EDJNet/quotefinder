@@ -1,5 +1,6 @@
 #' @import shiny
 app_ui <- function() {
+  available_websites <- unique(castarter_dataset[["website"]])
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
