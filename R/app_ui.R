@@ -26,7 +26,7 @@ app_ui <- function() {
         )
       ),
       body = shinydashboard::dashboardBody(
-        use_marker(),
+        marker::use_marker(),
         tags$head(HTML('<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>'),
                   tags$style(
                     ".red{background-color:#FFB8C3;}.blue{background-color:#6ECFEA;}.green{background-color:#a6ce39;}"
