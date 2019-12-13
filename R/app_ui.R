@@ -26,7 +26,11 @@ app_ui <- function() {
         )
       ),
       body = shinydashboard::dashboardBody(
-        tags$head(HTML('<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>')),
+        use_marker(),
+        tags$head(HTML('<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>'),
+                  tags$style(
+                    ".red{background-color:#FFB8C3;}.blue{background-color:#6ECFEA;}.green{background-color:#a6ce39;}"
+                  )),
         shinydashboard::tabItems(
           
           ##### tab_twitter_mep ####
@@ -223,7 +227,8 @@ app_ui <- function() {
                                   #shiny::actionButton("go", "Go!")),
                                   shiny::column(width = 9,
                                                 shiny::fluidRow(
-                                                                shiny::plotOutput("freqPlot")
+                                                                shiny::plotOutput("freqPlot",
+                                                                                  height = "600px")
                                                               )
                                                 ),
                                   shiny::fluidRow(DT::dataTableOutput(outputId = "kwic"))

@@ -18,8 +18,10 @@ library("shinydashboard")
 library("shinycustomloader")
 library("DT")
 library("webshot")
+library("extrafont")
+library("marker")
 
-extrafont::loadfonts()
+extrafont::loadfonts(quiet = TRUE)
 
 # qf data
 dataset <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "dataset.rds"))

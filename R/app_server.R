@@ -742,6 +742,21 @@
   
   #### DataTable ####
   
+  marker_table <- marker$new("#table")
+  
+  observeEvent(input$table_rows_current, {
+    if (input$selectedHashtag=="All tweets") {
+      current_hashtag <- ""
+    } else {
+      current_hashtag <- paste0("#", input$selectedHashtag)
+    }
+    
+    marker_table$
+      unmark(className = "green")$
+      mark(c(input$string, current_hashtag), className = "green")
+    
+  }, priority = -1)
+  
   output$table <- DT::renderDT({
     DT::datatable(data = currentDataset() %>% 
                     arrange(desc(time))%>%
@@ -874,7 +889,7 @@
                        axis.text = element_text(size = 16, family = "Roboto Condensed"),
                        text = element_text(size = 16, family = "Roboto Condensed")) +
         ggplot2::scale_colour_viridis_d() +
-        ggplot2::labs(title = stringr::str_wrap(paste("Number of occurrences per day of", knitr::combine_words(terms, before = '`'), "on the website of ", knitr::combine_words(unique(castarter_dataset$website), before = "the ", after = ""))),
+        ggplot2::labs(title = stringr::str_wrap(paste("Number of occurrences per day of", knitr::combine_words(terms, before = '`'), "on the website of ", knitr::combine_words(input$website_selector, before = "the ", after = ""))),
                       caption = paste0("Calculated on a ", input$rollingDays, "-days rolling ", tolower(input$rollingType)))
       
     } else if (input$freq=="Relative frequency") {
@@ -915,35 +930,20 @@
   })
   
   kwic_react <- shiny::reactive(x = {
-    temp <- castarter_dataset %>%
+    castarter_dataset %>%
       dplyr::filter(is.element(website, input$website_selector)) %>% 
       dplyr::filter(date>=input$dateRange_castarter[1], date<=input$dateRange_castarter[2]) %>%
       dplyr::filter(stringr::str_detect(string = sentence,
                                         pattern = stringr::regex(ignore_case = TRUE,
                                                                  pattern = paste(as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))), collapse = "|")))) %>%
-      dplyr::mutate(Source = paste0("<a target='_blank' href='", link, "'>", title, "</a><br />")) %>%
-      dplyr::rename(Sentence = sentence, Date = date) %>%
-      dplyr::select(Date, Source, Sentence) %>%
+      dplyr::mutate(Title = paste0("<a target='_blank' href='", link, "'>", title, "</a><br />")) %>%
+      dplyr::rename(Sentence = sentence, Date = date, Source = website) %>%
+      dplyr::select(Date, Source, Title, Sentence) %>%
       dplyr::arrange(desc(Date))
-    
-    # highlight string
-    if (length(as.character(tolower(trimws(stringr::str_split(string = input$term, pattern = ",", simplify = TRUE)))))==1) {
-      temp$Sentence <- purrr::map_chr(.x = temp$Sentence,
-                                      .f = function (x)
-                                        paste(c(rbind(as.character(stringr::str_split(string = x,
-                                                                                      pattern = stringr::regex(pattern = as.character(input$term), ignore_case = TRUE), simplify = TRUE)),
-                                                      c(paste0("<span style='background-color: #FFFF00'>",
-                                                               as.character(stringr::str_extract_all(string = x,
-                                                                                                     pattern = stringr::regex(as.character(input$term),
-                                                                                                                              ignore_case = TRUE),
-                                                                                                     simplify = TRUE)),
-                                                               "</span>"), ""))),
-                                              collapse = ""))
-    }
-    temp
   })
   
   # Renders table at the bottom of the main tab
+  
   output$kwic <- DT::renderDT(expr = kwic_react(),
                                      server = TRUE,
                   options = list(dom = "lipt",
@@ -952,6 +952,17 @@
                   escape = FALSE,
                   rownames = FALSE,
                   filter = "top")
+  
+  # highlight terms in table
+  
+  marker_kwic <- marker$new("#kwic")
+  
+  observeEvent(input$kwic_rows_current, {
+    marker_kwic$
+      unmark(className = "green")$ 
+      mark(trimws(as.character(stringr::str_split(input$term, pattern = ",",simplify = TRUE))), className = "green")
+  }, priority = -1)
+  
   
   output$dateRangeInput_UI <- renderUI({shiny::dateRangeInput(inputId = "dateRange_castarter",
                                                               label = "Date range",
