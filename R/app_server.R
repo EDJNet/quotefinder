@@ -967,12 +967,12 @@
   }, priority = -1)
   
   
-  output$dateRangeInput_UI <- renderUI({shiny::dateRangeInput(inputId = "dateRange_castarter",
-                                                              label = "Date range",
-                                                              start = min(castarter_dataset$date),
-                                                              end = max(castarter_dataset$date),
-                                                              weekstart = 1)})
-
+  # output$dateRangeInput__castarter_UI <- renderUI({shiny::dateRangeInput(inputId = "dateRange_castarter",
+  #                                                                        label = "Date range",
+  #                                                                        start = min(castarter_dataset$date),
+  #                                                                        end = max(castarter_dataset$date),
+  #                                                                        weekstart = 1)})
+  
   wc2_eu_castarter <- reactive({
     message(paste(Sys.time(), "WordcloudCastarter_eu", input$language, sep = "-"))
     castarter_dataset %>% 
@@ -992,6 +992,87 @@
   
   
   #### end of castarter section #########
-  #  tweets_r <- callModule(mod_qf_show_tweets_server, "qf_show_tweets_ui_1", tweets_r)
-  # List the first level callModules here
+  
+  
+  ###### tab_trending_news #########
+  
+  
+  top_entities_react <- reactive(x = ({
+    if (is.null(input$emm_language_selector)) {
+      return(NULL)
+    }
+    emm_df %>%
+      dplyr::filter(is.element(language, input$emm_language_selector)) %>%
+      dplyr::select(entity) %>%
+      tidyr::unnest(entity) %>%
+      dplyr::group_by(id, name) %>%
+      dplyr::count(sort = TRUE) %>%
+      dplyr::ungroup()
+  }))
+  
+  
+  emm_selected_news_react <- reactive(x = ({
+    
+    if (is.null(input$top_entities_dt_rows_selected)) {
+      return(NULL)
+    }
+    if (is.null(input$emm_language_selector)) {
+      return(NULL)
+    }
+    
+    
+    selected_entities_id <- top_entities_react() %>% 
+      dplyr::slice(input$top_entities_dt_rows_selected) %>% 
+      dplyr::pull(id)
+    
+    emm_df %>% 
+      tidyr::unnest(entity) %>%  
+      dplyr::filter(is.element(language, input$emm_language_selector)) %>%
+      dplyr::mutate(check = is.element(id, selected_entities_id)) %>% 
+      dplyr::group_by(link) %>% 
+      dplyr::filter(dplyr::if_else(sum(check)>0, TRUE, FALSE)) %>%
+      dplyr::group_by(link) %>% 
+      dplyr::mutate(Entity = paste(name, collapse = ", ")) %>%
+      dplyr::ungroup() %>% 
+      dplyr::distinct(link, .keep_all = TRUE) %>% 
+      dplyr::transmute(Date = as.Date(pubDate), 
+                       Source = domain,
+                       Title = paste0("<a target='_blank' href='", link, "'>",
+                                      stringr::str_trunc(string = title, width = 240),"</a>"),
+                       Entity, 
+                       Language = language) 
+    
+  }))
+  
+  output$top_entities_dt <- DT::renderDataTable(expr = ({
+    if (is.null(top_entities_react())) {
+      return(NULL)
+    }
+    top_entities_react() %>% 
+      dplyr::select(-id) %>% 
+      rename(entity = name)
+  }), options = list(dom = "ftip",
+                     pageLength = 10),
+  escape = TRUE,
+  rownames = FALSE,
+  server = TRUE,
+  selection = list(mode = 'single', selected = c(1)))
+  
+  
+  output$emm_table <- DT::renderDataTable(expr = ({
+    
+    emm_selected_news_react()
+    
+  }),
+  options = list(dom = "fipt",
+                 pageLength = 5,
+                 autoWidth = TRUE),
+  escape = FALSE,
+  rownames = FALSE,
+  server = TRUE,
+  filter = "top", 
+  )
+  
+  
+  ###### end of tab_trending_news #########
 }

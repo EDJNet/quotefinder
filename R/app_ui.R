@@ -15,13 +15,12 @@ app_ui <- function() {
           shinydashboard::menuItem(text = "Quotes from EU institutions",
                                    tabName = "tab_eu_official",
                                    icon = shiny::icon(name = "globe",
-                                                      lib = "font-awesome"),
-                                   badgeLabel = "beta"),
+                                                      lib = "font-awesome")),
           shinydashboard::menuItem(text = "EU-related trending news",
                                    tabName = "tab_trending_news",
                                    icon = shiny::icon("newspaper",
                                                       lib = "font-awesome"),
-                                   badgeLabel = "forthcoming"),
+                                   badgeLabel = "beta"),
           disable = FALSE,
           id = "tabs"
         )
@@ -224,7 +223,12 @@ app_ui <- function() {
                                                      step = 2,
                                                      value = 7,
                                                      round = TRUE),
-                                  shiny::uiOutput(outputId = "dateRangeInput_UI")),
+                                  shiny::dateRangeInput(inputId = "dateRange_castarter",
+                                                        label = "Date range",
+                                                        start = min(castarter_dataset$date),
+                                                        end = max(castarter_dataset$date),
+                                                        weekstart = 1)),
+                                 # shiny::uiOutput(outputId = "dateRangeInput_castarter_UI")),
                                   #shiny::actionButton("go", "Go!")),
                                   shiny::column(width = 9,
                                                 shiny::fluidRow(
@@ -232,13 +236,14 @@ app_ui <- function() {
                                                                                   height = "600px")
                                                               )
                                                 ),
+                                 shiny::fluidRow(shiny::h3("What are the most frequent words found in all these sentences?")),
                                   shiny::fluidRow(DT::dataTableOutput(outputId = "kwic")),
                                   shiny::fluidRow(shiny::column(width = 3, 
                                                                 shiny::sliderInput(inputId = "sizeVarWC2_castarter_eu",
                                                                                    label = "Wordcloud size",
                                                                                    min = 0.1, 
                                                                                    max = 2,
-                                                                                   value = 0.4,
+                                                                                   value = 0.5,
                                                                                    sep = "."
                                                                 ),
                                                                 shiny::sliderInput(inputId = "MaxWords_castarter_eu",
@@ -255,7 +260,29 @@ app_ui <- function() {
                                                                 wordcloud2Output("wordcloud2_eu_castarter")))
                                   
 
-          )
+          ),
+          ###### tab_trending_news #########
+          shinydashboard::tabItem(tabName = "tab_trending_news",
+                                  sidebarLayout(
+                                    sidebarPanel = sidebarPanel(
+                                      
+                                      shiny::fluidRow(
+                                        shinyWidgets::pickerInput(
+                                          inputId = "emm_language_selector",
+                                          label = "Select languages", 
+                                          choices = emm_languages,
+                                          selected = c("en", "de", "fr", "it", "es", "pl", "ro"),
+                                          options = list(
+                                            `actions-box` = TRUE), 
+                                          multiple = TRUE)
+                                      ),
+                                      shiny::h3("Click on the table below to filter news"),
+                                      shiny::fluidRow(
+                                        DT::dataTableOutput(outputId = "top_entities_dt"))
+                                    ), 
+                                    
+                                    mainPanel = mainPanel(fluidRow(DT::dataTableOutput(outputId = "emm_table")))
+                                  ))
           
         )
       ), title = "EDJNet's QuoteFinder",

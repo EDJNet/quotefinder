@@ -19,6 +19,7 @@ library("shinycustomloader")
 library("DT")
 library("webshot")
 library("extrafont")
+# remotes::install_github("JohnCoene/marker")
 library("marker")
 
 extrafont::loadfonts(quiet = TRUE)
@@ -33,8 +34,11 @@ countries <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_proce
 palettes <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "palettes.rds"))
 # castarter dataset
 castarter_dataset <- readRDS(file = file.path(.quotefinder.path,"qf_data", "castarter_dataset", "castarter_dataset.rds"))
- 
 available_websites <- unique(castarter_dataset[["website"]])
+# emm_newsbrief
+
+emm_df <- readRDS(file = file.path(.quotefinder.path,"qf_data", "emm_newsbrief_processed", "emm_newsbrief_processed.rds"))
+emm_languages <- readRDS(file = file.path(.quotefinder.path,"qf_data", "emm_newsbrief_processed", "emm_newsbrief_languages.rds"))
 
 langTable <- left_join(x = tibble::tibble(lang = unlist(lang)),
                        y = readRDS(file.path(.quotefinder.path, "qf_data", "tweets_processed", "langCode.rds")) %>%
