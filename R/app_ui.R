@@ -290,7 +290,7 @@ app_ui <- function() {
                                   ))
           
         ),
-        waiter::show_waiter_on_load(html =  spin_folding_cube())
+        waiter::show_waiter_on_load(html = waiter::spin_folding_cube())
       ), title = "EDJNet's QuoteFinder",
       skin = "purple"
     )
