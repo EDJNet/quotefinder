@@ -28,6 +28,7 @@ app_ui <- function() {
       body = shinydashboard::dashboardBody(
         marker::use_marker(),
         waiter::use_waiter(include_js = FALSE),
+        shinybusy::add_busy_spinner(spin = "folding-cube", color = "#6B2A8C", height = "120px", width = "120px"),
         tags$head(HTML('<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>'),
                   tags$style(
                     ".red{background-color:#FFB8C3;}.blue{background-color:#6ECFEA;}.green{background-color:#a6ce39;}"

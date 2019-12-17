@@ -77,8 +77,10 @@ RUN R -e 'remotes::install_cran("extrafont")'
 RUN R -e 'extrafont::font_import(prompt=FALSE)'
 RUN R -e 'extrafont::loadfonts()'
 
-RUN R -e 'remotes::install_github(repo = "JohnCoene/marker")'
 RUN R -e 'remotes::install_cran("waiter")'
+RUN R -e 'remotes::install_github(repo = "JohnCoene/marker")'
+
+RUN R -e 'remotes::install_cran("shinybusy")'
 
 RUN R -e 'remotes::install_github(repo = "giocomai/castarter")'
 RUN R -e 'remotes::install_github(repo = "edjnet/quotefinder")'

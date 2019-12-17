@@ -19,6 +19,7 @@ RUN R -e 'remotes::install_cran("magrittr")'
 RUN R -e 'remotes::install_cran("readr")'
 RUN R -e 'remotes::install_cran("tidytext")'
 RUN R -e 'remotes::install_cran("xml2")'
+RUN R -e 'remotes::install_cran("urltools")'
 
 RUN R -e 'remotes::install_github("edjnet/quotefinder")'
 
