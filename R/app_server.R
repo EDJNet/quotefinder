@@ -1075,4 +1075,6 @@
   
   
   ###### end of tab_trending_news #########
+  
+  waiter::hide_waiter()
 }

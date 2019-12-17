@@ -27,6 +27,7 @@ app_ui <- function() {
       ),
       body = shinydashboard::dashboardBody(
         marker::use_marker(),
+        use_waiter(include_js = FALSE),
         tags$head(HTML('<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>'),
                   tags$style(
                     ".red{background-color:#FFB8C3;}.blue{background-color:#6ECFEA;}.green{background-color:#a6ce39;}"
@@ -288,7 +289,8 @@ app_ui <- function() {
                                     mainPanel = mainPanel(fluidRow(DT::dataTableOutput(outputId = "emm_table")))
                                   ))
           
-        )
+        ),
+        waiter::show_waiter_on_load(html =  spin_folding_cube())
       ), title = "EDJNet's QuoteFinder",
       skin = "purple"
     )

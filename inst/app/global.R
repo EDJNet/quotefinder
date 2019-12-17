@@ -21,6 +21,7 @@ library("webshot")
 library("extrafont")
 # remotes::install_github("JohnCoene/marker")
 library("marker")
+library("waiter")
 
 extrafont::loadfonts(quiet = TRUE)
 
