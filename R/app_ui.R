@@ -270,7 +270,11 @@ app_ui <- function() {
                                         shinyWidgets::pickerInput(
                                           inputId = "emm_language_selector",
                                           label = "Select languages", 
-                                          choices = emm_languages,
+                                          choices = c("af", "ar", "bg", "bs", "ca", "cs", "da", "de", "el", "en", 
+                                                      "eo", "es", "et", "fa", "fi", "fr", "ha", "he", "hi", "hr", "hu", 
+                                                      "id", "it", "ja", "ka", "kk", "ko", "ku", "lb", "lt", "lv", "mk", 
+                                                      "mt", "nl", "pl", "pt", "ro", "ru", "sa", "sk", "sl", "sq", "sr", 
+                                                      "sv", "sw", "tr", "uk", "vi", "zh"),
                                           selected = c("en", "de", "fr", "it", "es", "pl", "ro"),
                                           options = list(
                                             `actions-box` = TRUE), 
