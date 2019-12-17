@@ -25,6 +25,10 @@ library("waiter")
 
 extrafont::loadfonts(quiet = TRUE)
 
+
+emm_df <- readRDS(file = file.path(.quotefinder.path,"qf_data", "emm_newsbrief_processed", "emm_newsbrief_processed.rds"))
+emm_languages <- readRDS(file = file.path(.quotefinder.path,"qf_data", "emm_newsbrief_processed", "emm_newsbrief_languages.rds"))
+
 # qf data
 dataset <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "dataset.rds"))
 hashtagsList <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_processed", "tweets_hashtags_list.rds"))
@@ -37,9 +41,6 @@ palettes <- readRDS(file = file.path(.quotefinder.path,"qf_data", "tweets_proces
 castarter_dataset <- readRDS(file = file.path(.quotefinder.path,"qf_data", "castarter_dataset", "castarter_dataset.rds"))
 available_websites <- unique(castarter_dataset[["website"]])
 # emm_newsbrief
-
-emm_df <- readRDS(file = file.path(.quotefinder.path,"qf_data", "emm_newsbrief_processed", "emm_newsbrief_processed.rds"))
-emm_languages <- readRDS(file = file.path(.quotefinder.path,"qf_data", "emm_newsbrief_processed", "emm_newsbrief_languages.rds"))
 
 langTable <- left_join(x = tibble::tibble(lang = unlist(lang)),
                        y = readRDS(file.path(.quotefinder.path, "qf_data", "tweets_processed", "langCode.rds")) %>%
