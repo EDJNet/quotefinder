@@ -996,15 +996,19 @@
   
   ###### tab_trending_news #########
   
+  emm_df_current_language <- reactive(x = ({
+    if (is.null(input$emm_language_selector)) {
+      return(NULL)
+    }
+    emm_df %>%
+      dplyr::filter(is.element(language, input$emm_language_selector)) 
+  }))
   
   top_entities_react <- reactive(x = ({
     if (is.null(input$emm_language_selector)) {
       return(NULL)
     }
-    emm_df %>%
-      dplyr::filter(is.element(language, input$emm_language_selector)) %>%
-      dplyr::select(entity) %>%
-      tidyr::unnest(entity) %>%
+    emm_df_current_language() %>% 
       dplyr::group_by(id, name) %>%
       dplyr::count(sort = TRUE) %>%
       dplyr::ungroup()
@@ -1020,14 +1024,11 @@
       return(NULL)
     }
     
-    
     selected_entities_id <- top_entities_react() %>% 
       dplyr::slice(input$top_entities_dt_rows_selected) %>% 
       dplyr::pull(id)
     
-    emm_df %>% 
-      tidyr::unnest(entity) %>%  
-      dplyr::filter(is.element(language, input$emm_language_selector)) %>%
+    emm_df_current_language() %>%  
       dplyr::mutate(check = is.element(id, selected_entities_id)) %>% 
       dplyr::group_by(link) %>% 
       dplyr::filter(dplyr::if_else(sum(check)>0, TRUE, FALSE)) %>%

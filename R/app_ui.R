@@ -284,7 +284,9 @@ app_ui <- function() {
                                       ),
                                       shiny::h3("Click on the table below to filter news"),
                                       shiny::fluidRow(
-                                        DT::dataTableOutput(outputId = "top_entities_dt"))
+                                        DT::dataTableOutput(outputId = "top_entities_dt")),
+                                      shiny::fluidRow(
+                                        shiny::HTML(text = "Powered by <a href='https://emm.newsbrief.eu/NewsBrief/clusteredition/en/latest.html' target = '_blank'>Emm Newsbrief</a>"))
                                     ), 
                                     
                                     mainPanel = mainPanel(fluidRow(DT::dataTableOutput(outputId = "emm_table")))
