@@ -286,10 +286,14 @@ app_ui <- function() {
                                       shiny::fluidRow(
                                         DT::dataTableOutput(outputId = "top_entities_dt")),
                                       shiny::fluidRow(
-                                        shiny::HTML(text = "Powered by <a href='https://emm.newsbrief.eu/NewsBrief/clusteredition/en/latest.html' target = '_blank'>Emm Newsbrief</a>"))
+                                        shiny::HTML(text = "Powered by <a href='https://emm.newsbrief.eu/NewsBrief/alertedition/en/ECnews.html' target = '_blank'>Emm Newsbrief</a>"))
                                     ), 
                                     
-                                    mainPanel = mainPanel(fluidRow(DT::dataTableOutput(outputId = "emm_table")))
+                                    mainPanel = mainPanel(fluidRow(
+                                      DT::dataTableOutput(outputId = "emm_table")
+                                      ),
+                                      fluidRow(billboarder::billboarderOutput("emm_selected_other_languages_bb"))
+                                    )
                                   ))
           
         ),

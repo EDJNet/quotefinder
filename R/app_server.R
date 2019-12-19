@@ -996,6 +996,8 @@
   
   ###### tab_trending_news #########
   
+  entity_reactValue <- reactiveValues(select=1)
+  
   emm_df_current_language <- reactive(x = ({
     if (is.null(input$emm_language_selector)) {
       return(NULL)
@@ -1005,15 +1007,28 @@
   }))
   
   top_entities_react <- reactive(x = ({
-    if (is.null(input$emm_language_selector)) {
-      return(NULL)
-    }
+    
     emm_df_current_language() %>% 
       dplyr::group_by(id, name) %>%
       dplyr::count(sort = TRUE) %>%
       dplyr::ungroup()
   }))
   
+  
+  selected_entities_id_react <- reactive(x = ({
+    top_entities_react() %>% 
+      dplyr::slice(input$top_entities_dt_rows_selected) %>% 
+      dplyr::pull(id)
+  }))
+  
+  selected_entities_name_react <- reactive(x = ({
+    if (is.null(input$top_entities_dt_rows_selected)) {
+      return(NULL)
+    }
+    top_entities_react() %>% 
+      dplyr::slice(input$top_entities_dt_rows_selected) %>% 
+      dplyr::pull(name)
+  }))
   
   emm_selected_news_react <- reactive(x = ({
     
@@ -1024,12 +1039,8 @@
       return(NULL)
     }
     
-    selected_entities_id <- top_entities_react() %>% 
-      dplyr::slice(input$top_entities_dt_rows_selected) %>% 
-      dplyr::pull(id)
-    
     emm_df_current_language() %>%  
-      dplyr::mutate(check = is.element(id, selected_entities_id)) %>% 
+      dplyr::mutate(check = is.element(id, selected_entities_id_react())) %>% 
       dplyr::group_by(link) %>% 
       dplyr::filter(dplyr::if_else(sum(check)>0, TRUE, FALSE)) %>%
       dplyr::group_by(link) %>% 
@@ -1045,6 +1056,37 @@
     
   }))
   
+  
+  emm_selected_other_languages_react <- reactive(x = ({
+    
+    if (is.null(input$top_entities_dt_rows_selected)) {
+      return(NULL)
+    }
+    if (is.null(input$emm_language_selector)) {
+      return(NULL)
+    }
+    
+    emm_df %>%
+      dplyr::filter(is.element(id, selected_entities_id_react())) %>% 
+      dplyr::group_by(language) %>% 
+      dplyr::count(sort = TRUE) %>% 
+      dplyr::ungroup() %>% 
+      dplyr::rename(Language = language)
+  }))
+  
+  output$emm_selected_other_languages_bb <- billboarder::renderBillboarder({
+    if (is.null(emm_selected_other_languages_react())) {
+      return(NULL)
+    }
+    billboarder::billboarder(data = emm_selected_other_languages_react()) %>% 
+      billboarder::bb_aes(x = Language, y = n) %>% 
+      billboarder::bb_barchart() %>% 
+      billboarder::bb_title(text = paste("News about", base::sQuote(selected_entities_name_react()), "by language. Click on the barchart to see news in a given language"),
+                            position = "left") %>% 
+      billboarder::bb_colors_manual(n = "#6b2a8c") %>% 
+      billboarder::bb_legend(show = FALSE)
+  })
+  
   output$top_entities_dt <- DT::renderDataTable(expr = ({
     if (is.null(top_entities_react())) {
       return(NULL)
@@ -1057,8 +1099,10 @@
   escape = TRUE,
   rownames = FALSE,
   server = TRUE,
-  selection = list(mode = 'single', selected = c(1)))
+  selection = list(mode = 'single',
+                   selected = entity_reactValue$select))
   
+  top_entities_dt_proxy <- DT::dataTableProxy("top_entities_dt")
   
   output$emm_table <- DT::renderDataTable(expr = ({
     
@@ -1078,6 +1122,19 @@
   server = TRUE,
   filter = "top", 
   )
+  
+  observeEvent(input$emm_selected_other_languages_bb_click, {
+    
+    entity_reactValue$previous_id <- selected_entities_id_react()
+    
+    shinyWidgets::updatePickerInput(
+      session = session,
+      inputId = "emm_language_selector",
+      selected = input$emm_selected_other_languages_bb_click
+    )
+    
+    
+  })
   
   ###### end of tab_trending_news #########
   
