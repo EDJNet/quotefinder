@@ -1040,7 +1040,7 @@
                        Source = domain,
                        Title = paste0("<a target='_blank' href='", link, "'>",
                                       stringr::str_trunc(string = title, width = 240),"</a>"),
-                       Entity, 
+                       `Entities mentioned` = Entity, 
                        Language = language) 
     
   }))
@@ -1067,13 +1067,17 @@
   }),
   options = list(dom = "fipt",
                  pageLength = 5,
-                 autoWidth = TRUE),
+                 autoWidth = TRUE,
+                 columnDefs = (list(list(width = '5%', targets =c(0, 4)),
+                                    list(width = '10%', targets =c(1)),
+                                    list(width = '45%', targets =c(2)),
+                                    list(width = '35%', targets =c(3))
+                 ))),
   escape = FALSE,
   rownames = FALSE,
   server = TRUE,
   filter = "top", 
   )
-  
   
   ###### end of tab_trending_news #########
   
