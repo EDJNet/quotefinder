@@ -1,0 +1,29 @@
+---
+title: "Get EU castarter"
+author: "Giorgio Comai"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library("castarter")
+Sys.setenv(HEADLESS_CHROME = "/usr/bin/chromium-browser")
+library("crrri")
+```
+
+```{r time}
+Sys.time()
+```
+
+# EU Commission
+
+```{r}
+
+SetCastarter(project = "european_union", website = "eu_commission")
+UpdateDataset(use_headless_chromium = TRUE)
+ArchiveFolders(removeArchivedFolders = TRUE)
+
+```
+
+
+
