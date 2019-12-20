@@ -43,3 +43,8 @@ a {
 .sidebar-menu > li {
   margin-bottom: 10px;
 }
+
+
+.bb svg {
+  font: 10px Roboto condensed;
+}
