@@ -1052,7 +1052,8 @@
                        Title = paste0("<a target='_blank' href='", link, "'>",
                                       stringr::str_trunc(string = title, width = 240),"</a>"),
                        `Entities mentioned` = Entity, 
-                       Language = language) 
+                       Language = language) %>% 
+      dplyr::arrange(dplyr::desc(Date))
     
   }))
   
