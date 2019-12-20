@@ -14,6 +14,11 @@ library("stringr")
 library("tidytext")
 library("rtweet")
 library("wordcloud")
+library("RColorBrewer")
+library("webshot")
+library("htmlwidgets")
+library("wordcloud2")
+
 library("extrafont")
 extrafont::loadfonts()
 # library("devtools")
@@ -21,6 +26,10 @@ extrafont::loadfonts()
 # library("rtweet")
 
 dir.create(path = "img",showWarnings = FALSE)
+
+
+bluesFunc <- colorRampPalette(colors = c("#4292C6", "#08306B"))
+blues <- bluesFunc(5)
   
 twitter_token <- readRDS(file = "twitter_token.rds")
 ```
@@ -166,3 +175,56 @@ post_tweet(status = paste0("What are the most frequent positive and negative key
 
 ```
 
+
+
+```{r}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+if (!require("pacman")) install.packages("pacman",  repos = "https://cloud.r-project.org") # for taking care of package installation/loading
+pacman::p_load("tidyverse")
+pacman::p_load("tidytext")
+pacman::p_load("ROAuth")
+pacman::p_load("rtweet")
+pacman::p_load("stringr")
+pacman::p_load("reshape2")
+pacman::p_load("wordcloud")
+# pacman::p_load("devtools")
+# devtools::install_github("mkearney/rtweet")
+# library("rtweet")
+
+dir.create(path = "img",showWarnings = FALSE)
+twitter_token <- readRDS(file = "twitter_token.rds")
+```
+
+
+
+```{r}
+dataset <- dataset %>% 
+  filter(lang=="en") %>% 
+    select(clean_text) %>% 
+  unnest_tokens(input = clean_text, output = word) %>% 
+  # remove stopwords, if list for the relevant language is available, otherwise do nothing
+  when(is.element(el = "en", set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
+         anti_join(., data_frame(word = stopwords::stopwords(language = "en", source = "stopwords-iso")), by = "word"),
+       ~ .) %>% 
+count(word, sort = TRUE)  
+# customise output color, gradients of blue by frequency
+colour <- dataset %>% 
+  mutate(colour = case_when(
+    n <= quantile(n)[1] ~ blues[1],
+    n > quantile(n)[1]& n<=quantile(n)[2] ~ blues[2],
+    n > quantile(n)[2]& n<=quantile(n)[3] ~ blues[3],
+    n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
+    n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
+  )) %>% pull(colour)
+#sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*5)
+# graph <- dataset %>% 
+#   wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = 2.2, shape = "star")
+filename <- file.path("img", paste(Sys.time(), "star wordcloud2 3months EN.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 10, vwidth = 2048, vheight = 1512)
+
+post_tweet(status = paste0("Three months of MEPs on Twitter, in a star. Explore the tweets also in other languages at https://www.europeandatajournalism.eu/Tools-for-journalists/Quote-Finder/"), media = filename, token = twitter_token)
+```

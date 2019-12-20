@@ -36,7 +36,11 @@ RUN R -e 'remotes::install_cran("extrafont")'
 RUN R -e 'extrafont::font_import(prompt=FALSE)'
 RUN R -e 'extrafont::loadfonts()'
 
-RUN R -e 'remotes::install_cran("rtweet")'
+RUN R -e 'remotes::install_github(repo = "Lchiffon/wordcloud2")'
+RUN R -e 'remotes::install_cran("webshot")'
 
+RUN R -e 'remotes::install_cran("RColorBrewer")'
+RUN R -e 'remotes::install_cran("htmlwidgets")'
+RUN R -e 'remotes::install_cran("rtweet")'
 
 CMD Rscript /home/qf/qf_data/qf_twitter_bot.R
