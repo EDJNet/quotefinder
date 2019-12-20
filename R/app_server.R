@@ -705,7 +705,7 @@
       paste0("QuoteFinderWordCount", ".csv")
     },
     content = function(file) {
-      write_csv(x = currentDataset() %>%
+      readr::write_csv(x = currentDataset() %>%
                   select(clean_text) %>% 
                   unnest_tokens(input = clean_text, output = word) %>% 
                   # remove stopwords, if list for the relevant language is available, otherwise do nothing
@@ -1103,7 +1103,7 @@
   selection = list(mode = 'single',
                    selected = entity_reactValue$select))
   
-  top_entities_dt_proxy <- DT::dataTableProxy("top_entities_dt")
+  #top_entities_dt_proxy <- DT::dataTableProxy("top_entities_dt")
   
   output$emm_table <- DT::renderDataTable(expr = ({
     
@@ -1139,5 +1139,5 @@
   
   ###### end of tab_trending_news #########
   
-  waiter::hide_waiter()
+  # waiter::hide_waiter()
 }
