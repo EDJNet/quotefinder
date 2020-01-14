@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>quotefinder • quotefinder</title>
+<title>Customise the outlook of the shiny app • quotefinder</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="quotefinder">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Customise the outlook of the shiny app">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -94,18 +94,36 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>quotefinder</h1>
+      <h1>Customise the outlook of the shiny app</h1>
+                        <h4 class="author">Giorgio Comai</h4>
             
+            <h4 class="date">2019-11-20</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/edjnet/quotefinder/blob/master/vignettes/edjnetquotefinder.Rmd"><code>vignettes/edjnetquotefinder.Rmd</code></a></small>
-      <div class="hidden name"><code>edjnetquotefinder.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/edjnet/quotefinder/blob/master/vignettes/customise_the_outlook_of_the_app.Rmd"><code>vignettes/customise_the_outlook_of_the_app.Rmd</code></a></small>
+      <div class="hidden name"><code>customise_the_outlook_of_the_app.Rmd</code></div>
 
     </div>
 
     
     
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(quotefinder)</a></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">run_app</span>()</a></code></pre></div>
+<p>The <code>[fresh](https://github.com/dreamRs/fresh)</code> package facilitates customising Shiny app.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">create_theme</span>(</a>
+<a class="sourceLine" id="cb1-2" title="2">  <span class="kw">adminlte_global</span>(</a>
+<a class="sourceLine" id="cb1-3" title="3">    <span class="dt">content_bg =</span> <span class="st">"#FFF"</span></a>
+<a class="sourceLine" id="cb1-4" title="4">  ),</a>
+<a class="sourceLine" id="cb1-5" title="5">  <span class="kw">adminlte_sidebar</span>(</a>
+<a class="sourceLine" id="cb1-6" title="6">    <span class="dt">dark_bg =</span> <span class="st">"#80829a"</span>,</a>
+<a class="sourceLine" id="cb1-7" title="7">    <span class="dt">dark_hover_bg =</span> <span class="st">"#53486c"</span></a>
+<a class="sourceLine" id="cb1-8" title="8">  ),</a>
+<a class="sourceLine" id="cb1-9" title="9">  <span class="kw">adminlte_color</span>(</a>
+<a class="sourceLine" id="cb1-10" title="10">    <span class="dt">light_blue =</span> <span class="st">"#3f2d54"</span>,</a>
+<a class="sourceLine" id="cb1-11" title="11">    <span class="dt">aqua =</span> <span class="st">"#75b8d1"</span>,</a>
+<a class="sourceLine" id="cb1-12" title="12">    <span class="dt">green =</span> <span class="st">"#c9d175"</span>,</a>
+<a class="sourceLine" id="cb1-13" title="13">    <span class="dt">red =</span> <span class="st">"#d175b8"</span>,</a>
+<a class="sourceLine" id="cb1-14" title="14">    <span class="dt">purple =</span> <span class="st">"#3f2d54"</span>,</a>
+<a class="sourceLine" id="cb1-15" title="15">    <span class="dt">yellow =</span> <span class="st">"#d1ab75"</span></a>
+<a class="sourceLine" id="cb1-16" title="16">  )</a>
+<a class="sourceLine" id="cb1-17" title="17">)</a></code></pre></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

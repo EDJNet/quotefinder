@@ -20,7 +20,7 @@ library(quotefinder)
 
 ## Getting the data
 
-```{r eval=FALSE}
+```{r eval=FALSE, message=FALSE}
 qf_get_emm_newsbrief(category_id = "ECnews",
                      keep_xml = FALSE)
 ```
@@ -28,18 +28,18 @@ qf_get_emm_newsbrief(category_id = "ECnews",
 
 ## Find the most popular entities
 
-```{r}
+```{r eval=FALSE}
 entities <- qf_emm_extract_entities(language = NULL, days = 7)
 
 readr::write_rds(x = entities, path = fs::path("qf_data", "emm_entities.rds"))
 ```
 
-```{r}
+```{r eval=FALSE}
 entities %>% 
   dplyr::group_by(id, name, language) %>% 
   dplyr::count(sort = TRUE)
 ```
 
-check 
+For reference, see also:
 
 https://data.jrc.ec.europa.eu/dataset/jrc-emm-jrc-names

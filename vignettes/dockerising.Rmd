@@ -125,24 +125,9 @@ Leave an empty line at the end the crontab, save, and... you're done. This will 
 
 If you are unfamiliar with cron, in order to customise frequency and time consider using [`cronR`](https://github.com/bnosac/cronR).
 
-
-# Run the app
-
-
 ## Add EMM newsbrief
 
 ```{bash eval = FALSE}
 0 * * * * docker run --rm -v $HOME/qf_data:/home/qf/qf_data giocomai/qf_get_emm_newsbrief:latest >> $HOME/qf_data/qf_get_emm_newsbrief.log 2>&1
-```
-
-
-
-
-```{r setup}
-library(quotefinder)
-```
-
-```{r eval = FALSE}
-golem::add_dockerfile()
 ```
 

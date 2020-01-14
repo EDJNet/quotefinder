@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Retrieving tweets • quotefinder</title>
+<title>Working with EMM newsbrief data • quotefinder</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Retrieving tweets">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Working with EMM newsbrief data">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -88,52 +88,34 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>Retrieving tweets</h1>
+      <h1>Working with EMM newsbrief data</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/edjnet/quotefinder/blob/master/vignettes/retrieving_tweets.Rmd"><code>vignettes/retrieving_tweets.Rmd</code></a></small>
-      <div class="hidden name"><code>retrieving_tweets.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/edjnet/quotefinder/blob/master/vignettes/emm_newsbrief.Rmd"><code>vignettes/emm_newsbrief.Rmd</code></a></small>
+      <div class="hidden name"><code>emm_newsbrief.Rmd</code></div>
 
     </div>
 
     
     
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="st">"quotefinder"</span>)</a>
-<a class="sourceLine" id="cb1-2" title="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="st">"rtweet"</span>)</a>
-<a class="sourceLine" id="cb1-3" title="3"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="st">"dplyr"</span>)</a>
-<a class="sourceLine" id="cb1-4" title="4"></a>
-<a class="sourceLine" id="cb1-5" title="5">twitter_token &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span>(<span class="dt">file =</span> <span class="st">"twitter_token.rds"</span>)</a></code></pre></div>
-<p>There are three main ways to retrieve tweets using Twitter’s API:</p>
-<ol style="list-style-type: decimal">
-<li>get tweets from a single user (or many users, asking one by one)</li>
-<li>get tweets from a list of users</li>
-<li>get tweets from the streaming APIs, e.g. by searching for a keyword or hashtag</li>
-</ol>
-<p>By itself, the excellent <code>rtweet</code> package commonly used to interact with the Twitter APIs with R, does not provide convenience functions to cache and store tweets, leaving this to the user.</p>
-<p>The present <code>quotefinder</code> package provides such functions in order to facilitate collecting and pre-processing tweets in order to feed them to the QuoteFinder app. All retrieved tweets are stored in dated local sub-folders.</p>
-<div id="getting-tweets-by-user" class="section level2">
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(quotefinder)</a></code></pre></div>
+<div id="getting-the-data" class="section level2">
 <h2 class="hasAnchor">
-<a href="#getting-tweets-by-user" class="anchor"></a>Getting tweets by user</h2>
-<p>The following command will download all available tweets for the given users and store them locally. If they have been previously downloaded, it will download only newer tweets.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw"><a href="../reference/qf_get_tweets_by_user.html">qf_get_tweets_by_user</a></span>(<span class="dt">users =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Europarl_EN"</span>, <span class="st">"EuroParlPress"</span>),</a>
-<a class="sourceLine" id="cb2-2" title="2">                      <span class="dt">twitter_token =</span> twitter_token)</a></code></pre></div>
+<a href="#getting-the-data" class="anchor"></a>Getting the data</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw"><a href="../reference/qf_get_emm_newsbrief.html">qf_get_emm_newsbrief</a></span>(<span class="dt">category_id =</span> <span class="st">"ECnews"</span>,</a>
+<a class="sourceLine" id="cb2-2" title="2">                     <span class="dt">keep_xml =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 </div>
-<div id="getting-tweets-from-lists" class="section level2">
+<div id="find-the-most-popular-entities" class="section level2">
 <h2 class="hasAnchor">
-<a href="#getting-tweets-from-lists" class="anchor"></a>Getting tweets from lists</h2>
-<p>When there is a need to collect regularly tweets from hundreds or thousands of users, this approach quickly becomes impractical, as it is easier to hit the limits allowed by Twitter APIs.</p>
-<p>An easy solution is to create a list of users, and then make a single request to get recent tweets for all accounts included in the list.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw"><a href="../reference/qf_get_tweets_from_list.html">qf_get_tweets_from_list</a></span>(<span class="dt">slug =</span> <span class="st">"current-meps"</span>,</a>
-<a class="sourceLine" id="cb3-2" title="2">                        <span class="dt">owner_user =</span> <span class="st">"EDJQuoteFinder"</span>,</a>
-<a class="sourceLine" id="cb3-3" title="3">                        <span class="dt">n =</span> <span class="dv">3200</span>,</a>
-<a class="sourceLine" id="cb3-4" title="4">                        <span class="dt">include_rts =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb3-5" title="5">                        <span class="dt">twitter_token =</span> twitter_token)</a></code></pre></div>
-</div>
-<div class="footnotes">
-<hr>
-<ol>
-<li id="fn1"><p>It is easy to create new lists by using <code>rtweet</code>s <code><a href="https://rdrr.io/pkg/rtweet/man/post_list.html">post_list()</a></code> function.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-</ol>
+<a href="#find-the-most-popular-entities" class="anchor"></a>Find the most popular entities</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">entities &lt;-<span class="st"> </span><span class="kw"><a href="../reference/qf_emm_extract_entities.html">qf_emm_extract_entities</a></span>(<span class="dt">language =</span> <span class="ot">NULL</span>, <span class="dt">days =</span> <span class="dv">7</span>)</a>
+<a class="sourceLine" id="cb3-2" title="2"></a>
+<a class="sourceLine" id="cb3-3" title="3">readr<span class="op">::</span><span class="kw"><a href="https://readr.tidyverse.org/reference/read_rds.html">write_rds</a></span>(<span class="dt">x =</span> entities, <span class="dt">path =</span> fs<span class="op">::</span><span class="kw"><a href="http://fs.r-lib.org/reference/path.html">path</a></span>(<span class="st">"qf_data"</span>, <span class="st">"emm_entities.rds"</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">entities <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(id, name, language) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/tally.html">count</a></span>(<span class="dt">sort =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<p>For reference, see also:</p>
+<p><a href="https://data.jrc.ec.europa.eu/dataset/jrc-emm-jrc-names" class="uri">https://data.jrc.ec.europa.eu/dataset/jrc-emm-jrc-names</a></p>
 </div>
   </div>
 
@@ -143,8 +125,8 @@
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#getting-tweets-by-user">Getting tweets by user</a></li>
-      <li><a href="#getting-tweets-from-lists">Getting tweets from lists</a></li>
+<li><a href="#getting-the-data">Getting the data</a></li>
+      <li><a href="#find-the-most-popular-entities">Find the most popular entities</a></li>
       </ul>
 </div>
       </div>

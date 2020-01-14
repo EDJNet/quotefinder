@@ -11,7 +11,9 @@ if(!require(pacman)) install.packages("pacman")
 pacman::p_load("tidyverse")
 pacman::p_load("XML")
 
-remotes::install_github("giocomai/castarter")
+# remotes::install_github("giocomai/castarter")
+
+library("quotefinder")
 ```
 
 This document outlines an approach for getting basic information about all members of the European Parliament (MEPs). The data collected will then be fed to the Quote Finder. 
@@ -88,6 +90,19 @@ twitter_urls <- twitter_urls %>%
 
 
 twitter_urls[str_detect(string = twitter_urls, pattern = "www.facebook.com")&is.na(twitter_urls)==FALSE] <- NA
+
+
+email <- purrr::map_chr(.x = seq_along(fullName),
+                 .f = function (x) {
+    temp <- ExtractLinks(container = "div",
+                         containerClass = "ep-p_text link_email",
+                         id = x)
+    if (length(temp)==0) {
+      NA
+    } else {
+      temp[[1]]
+    }
+  })
 ```
 
 Now, as it's both more common and more practical to refer to EP groups by the shortened version of their name, we'll need to match the long version provided on the official website with the standard short version. 
@@ -127,7 +142,10 @@ all_MEPs_group_twitter <-
                                   pattern = "https://twitter.com/")) %>% 
   left_join(y = groups %>%
               dplyr::rename(politicalGroup=GroupLong),
-            by = "politicalGroup")
+            by = "politicalGroup") %>% 
+  mutate(email = str_replace(fullName, " ", ".") %>% str_remove_all(" ") %>% str_to_lower() %>% paste0(., "@europarl.europa.eu") %>% stringi::stri_trans_general(id = "Latin-ASCII"))
+
+write_csv(x = all_MEPs_group_twitter, path = "all_MEPs_group_official.csv")
 ```
 
 Does this adequately capture all the MEPs who are on Twitter?
@@ -200,7 +218,7 @@ The problem is that, as anyone who has been analysing twitter for a while will k
 
 To facilitate consistent pairing of the MEP with a Twitter profile, it is useful to retrieve the unchangeable numeric user id that Twitter assigns to every user.
 
-```{r}
+```{r eval=FALSE}
 qf_twitter_list <- rtweet::lists_members(slug = "current-meps",
                                          owner_user = "EDJQuoteFinder",
                                          token = twitter_token)
@@ -213,6 +231,8 @@ write_rds(x = qf_twitter_list, path = "qf_twitter_list.rds")
 # Have all these data together
 
 ```{r}
+qf_twitter_list <- readr::read_rds(path = "qf_twitter_list.rds")
+
 all_MEPs_eliflab <- read_csv(file = "https://raw.githubusercontent.com/giocomai/European-Parliament-Open-Data/master/meps_full_list_with_twitter_accounts.csv") %>% 
   select(NAME, TWITTER_URL, SCREEN_NAME) %>% 
   mutate(screen_name = str_remove(SCREEN_NAME, "@")) %>% 
@@ -230,7 +250,7 @@ all_MEPs_full <- all_MEPs_group_twitter %>%
 It is now possible to store these data for reference.
 
 
-```{r}
+```{r eval = FALSE}
 readr::write_rds(x = all_MEPs_full,
                  path = "all_MEPs_full.rds")
 readr::write_csv(x = all_MEPs_full,

@@ -18,6 +18,7 @@ library("RColorBrewer")
 library("webshot")
 library("htmlwidgets")
 library("wordcloud2")
+library("purrr")
 
 library("extrafont")
 extrafont::loadfonts()
@@ -32,16 +33,12 @@ bluesFunc <- colorRampPalette(colors = c("#4292C6", "#08306B"))
 blues <- bluesFunc(5)
   
 twitter_token <- readRDS(file = "twitter_token.rds")
-```
 
-```{r load data}
-dataFolder <- "/home/qf/qf_data/"
+dataFolder <- "/home/qf/qf_data/tweets_processed/"
 
 dataset <- readRDS(file = file.path(dataFolder, "dataset.rds"))
-trendingHashtags <- readRDS(file = file.path(dataFolder, "tweets_hashtags_list.rds"))
+hashtags <- readRDS(file = file.path(dataFolder, "tweets_hashtags_list.rds"))
 trendingHashtags <- readRDS(file = file.path(dataFolder, "tweets_trending_hashtags_list.rds"))
-
-
 ```
 
 Pick a tweet type randomly
@@ -50,10 +47,22 @@ Pick a tweet type randomly
 
 RandomTweetType <-
   tibble::tribble(~id, ~TweetType,
-                  1, "sentiment wordcloud first english hashtag",
-                  2, "sentiment wordcloud second english hashtag",
-                  3, "sentiment wordcloud third english hashtag",
-                  4, "sentiment wordcloud all tweets en"
+                  1, "sentiment wordcloud first trending english hashtag",
+                  2, "sentiment wordcloud second trending english hashtag",
+                  3, "sentiment wordcloud third trending english hashtag",
+                  4, "sentiment wordcloud all tweets en",
+                  5, "wc2 all english 1 month",
+                  6, "wc2 all german 1 month",
+                  7, "wc2 all italian 1 month",
+                  8, "wc2 all french 1 month",
+                  9, "wc2 all polish 1 month",
+                  10, "wc2 all spanish 1 month",
+                  11, "random top english hashtag",
+                  12, "random top english hashtag",
+                  13, "random top italian hashtag",
+                  14, "random top german hashtag",
+                  15, "random top french hashtag",
+                  
   )
 
 selected <- sample(x = 1:nrow(RandomTweetType), size = 1)
@@ -178,30 +187,227 @@ post_tweet(status = paste0("What are the most frequent positive and negative key
 
 
 ```{r}
+if (selected == 5) {
+dataset <- dataset %>% 
+  filter(lang=="en") %>% 
+    select(clean_text) %>% 
+  unnest_tokens(input = clean_text, output = word) %>% 
+  # remove stopwords, if list for the relevant language is available, otherwise do nothing
+  when(is.element(el = "en", set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
+         anti_join(., tibble::tibble(word = stopwords::stopwords(language = "en", source = "stopwords-iso")), by = "word"),
+       ~ .) %>% 
+count(word, sort = TRUE)  
+# customise output color, gradients of blue by frequency
+colour <- dataset %>% 
+  mutate(colour = case_when(
+    n <= quantile(n)[1] ~ blues[1],
+    n > quantile(n)[1]& n<=quantile(n)[2] ~ blues[2],
+    n > quantile(n)[2]& n<=quantile(n)[3] ~ blues[3],
+    n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
+    n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
+  )) %>% pull(colour)
+#sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*5)
+# graph <- dataset %>% 
+#   wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = 1.2, shape = "star")
+filename <- file.path("img", paste(Sys.time(), "star_wordcloud2_1month EN.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 20, vwidth = 2048, vheight = 1512)
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-if (!require("pacman")) install.packages("pacman",  repos = "https://cloud.r-project.org") # for taking care of package installation/loading
-pacman::p_load("tidyverse")
-pacman::p_load("tidytext")
-pacman::p_load("ROAuth")
-pacman::p_load("rtweet")
-pacman::p_load("stringr")
-pacman::p_load("reshape2")
-pacman::p_load("wordcloud")
-# pacman::p_load("devtools")
-# devtools::install_github("mkearney/rtweet")
-# library("rtweet")
+post_tweet(status = paste0("One months of MEPs on Twitter, in a star. Explore the tweets also in other languages at https://applications.europeandatajournalism.eu/quotefinder/"), media = filename, token = twitter_token)
 
-dir.create(path = "img",showWarnings = FALSE)
-twitter_token <- readRDS(file = "twitter_token.rds")
+}
+```
+
+
+
+
+```{r}
+if (selected == 6) {
+dataset <- dataset %>% 
+  filter(lang=="de") %>% 
+    select(clean_text) %>% 
+  unnest_tokens(input = clean_text, output = word) %>% 
+  # remove stopwords, if list for the relevant language is available, otherwise do nothing
+  when(is.element(el = "de", set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
+         anti_join(., tibble::tibble(word = stopwords::stopwords(language = "de", source = "stopwords-iso")), by = "word"),
+       ~ .) %>% 
+count(word, sort = TRUE)  
+# customise output color, gradients of blue by frequency
+colour <- dataset %>% 
+  mutate(colour = case_when(
+    n <= quantile(n)[1] ~ blues[1],
+    n > quantile(n)[1]& n<=quantile(n)[2] ~ blues[2],
+    n > quantile(n)[2]& n<=quantile(n)[3] ~ blues[3],
+    n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
+    n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
+  )) %>% pull(colour)
+#sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*5)
+# graph <- dataset %>% 
+#   wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = 1.2, shape = "star")
+filename <- file.path("img", paste(Sys.time(), "star_wordcloud2_1month DE.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 20, vwidth = 2048, vheight = 1512)
+
+post_tweet(status = paste0("One month of MEPs posting in German on Twitter, in a star. Explore the tweets also in other languages at https://applications.europeandatajournalism.eu/quotefinder/"), media = filename, token = twitter_token)
+
+}
+```
+
+
+
+
+```{r}
+if (selected == 7) {
+dataset <- dataset %>% 
+  filter(lang=="it") %>% 
+    select(clean_text) %>% 
+  unnest_tokens(input = clean_text, output = word) %>% 
+  # remove stopwords, if list for the relevant language is available, otherwise do nothing
+  when(is.element(el = "it", set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
+         anti_join(., tibble::tibble(word = stopwords::stopwords(language = "it", source = "stopwords-iso")), by = "word"),
+       ~ .) %>% 
+count(word, sort = TRUE)  
+# customise output color, gradients of blue by frequency
+colour <- dataset %>% 
+  mutate(colour = case_when(
+    n <= quantile(n)[1] ~ blues[1],
+    n > quantile(n)[1]& n<=quantile(n)[2] ~ blues[2],
+    n > quantile(n)[2]& n<=quantile(n)[3] ~ blues[3],
+    n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
+    n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
+  )) %>% pull(colour)
+#sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*5)
+# graph <- dataset %>% 
+#   wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = 1.1, shape = "star")
+filename <- file.path("img", paste(Sys.time(), "star_wordcloud2_1month IT.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 20, vwidth = 2048, vheight = 1512)
+
+post_tweet(status = paste0("What did MEPs tweet in Italian in the last month? Here's a summary in a star. Find out more: https://applications.europeandatajournalism.eu/quotefinder/"), media = filename, token = twitter_token)
+
+}
+```
+
+
+
+
+
+```{r}
+if (selected == 8) {
+dataset <- dataset %>% 
+  filter(lang=="fr") %>% 
+    select(clean_text) %>% 
+  unnest_tokens(input = clean_text, output = word) %>% 
+  # remove stopwords, if list for the relevant language is available, otherwise do nothing
+  when(is.element(el = "fr", set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
+         anti_join(., tibble::tibble(word = stopwords::stopwords(language = "fr", source = "stopwords-iso")), by = "word"),
+       ~ .) %>% 
+count(word, sort = TRUE)  
+# customise output color, gradients of blue by frequency
+colour <- dataset %>% 
+  mutate(colour = case_when(
+    n <= quantile(n)[1] ~ blues[1],
+    n > quantile(n)[1]& n<=quantile(n)[2] ~ blues[2],
+    n > quantile(n)[2]& n<=quantile(n)[3] ~ blues[3],
+    n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
+    n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
+  )) %>% pull(colour)
+#sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*5)
+# graph <- dataset %>% 
+#   wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = 1.2, shape = "star")
+filename <- file.path("img", paste(Sys.time(), "star_wordcloud2_1month FR.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 20, vwidth = 2048, vheight = 1512)
+
+post_tweet(status = paste0("What did MEPs tweet in French in the last month? Here's a summary in a star. Find out more: https://applications.europeandatajournalism.eu/quotefinder/"), media = filename, token = twitter_token)
+
+}
 ```
 
 
 
 ```{r}
+if (selected == 9) {
+dataset <- dataset %>% 
+  filter(lang=="pl") %>% 
+    select(clean_text) %>% 
+  unnest_tokens(input = clean_text, output = word) %>% 
+  # remove stopwords, if list for the relevant language is available, otherwise do nothing
+  when(is.element(el = "pl", set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
+         anti_join(., tibble::tibble(word = stopwords::stopwords(language = "pl", source = "stopwords-iso")), by = "word"),
+       ~ .) %>% 
+count(word, sort = TRUE)  
+# customise output color, gradients of blue by frequency
+colour <- dataset %>% 
+  mutate(colour = case_when(
+    n <= quantile(n)[1] ~ blues[1],
+    n > quantile(n)[1]& n<=quantile(n)[2] ~ blues[2],
+    n > quantile(n)[2]& n<=quantile(n)[3] ~ blues[3],
+    n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
+    n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
+  )) %>% pull(colour)
+#sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*5)
+# graph <- dataset %>% 
+#   wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = 1.2, shape = "star")
+filename <- file.path("img", paste(Sys.time(), "star_wordcloud2_1month PL.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 20, vwidth = 2048, vheight = 1512)
+
+post_tweet(status = paste0("What did MEPs tweet in Polish in the last month? Here's a summary in a star. Find out more: https://applications.europeandatajournalism.eu/quotefinder/"), media = filename, token = twitter_token)
+
+}
+```
+
+
+
+```{r}
+if (selected == 10) {
+dataset <- dataset %>% 
+  filter(lang=="es") %>% 
+    select(clean_text) %>% 
+  unnest_tokens(input = clean_text, output = word) %>% 
+  # remove stopwords, if list for the relevant language is available, otherwise do nothing
+  when(is.element(el = "es", set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
+         anti_join(., tibble::tibble(word = stopwords::stopwords(language = "es", source = "stopwords-iso")), by = "word"),
+       ~ .) %>% 
+count(word, sort = TRUE)  
+# customise output color, gradients of blue by frequency
+colour <- dataset %>% 
+  mutate(colour = case_when(
+    n <= quantile(n)[1] ~ blues[1],
+    n > quantile(n)[1]& n<=quantile(n)[2] ~ blues[2],
+    n > quantile(n)[2]& n<=quantile(n)[3] ~ blues[3],
+    n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
+    n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
+  )) %>% pull(colour)
+#sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*5)
+# graph <- dataset %>% 
+#   wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = 1.2, shape = "star")
+filename <- file.path("img", paste(Sys.time(), "star_wordcloud2_1month ES.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 20, vwidth = 2048, vheight = 1512)
+
+post_tweet(status = paste0("What did MEPs tweet in Spanish in the last month? Here's a summary in a star. Find out more: https://applications.europeandatajournalism.eu/quotefinder/"), media = filename, token = twitter_token)
+
+}
+```
+
+
+
+```{r}
+if (selected == 11|selected == 12) {
+randomTopHashtag <- unlist(sample(head(trendingHashtags$en, 3), 1))
+NrOfTweets <- str_extract(string = randomTopHashtag, pattern = "([[:digit:]]+)")
+hashtag <- str_extract(string = randomTopHashtag, pattern = "([[:alnum:]]+)")
 dataset <- dataset %>% 
   filter(lang=="en") %>% 
+  filter(purrr::map_lgl(.x = hashtags, .f = function (x) is.element(el = as.character(hashtag), set = x))) %>%
     select(clean_text) %>% 
   unnest_tokens(input = clean_text, output = word) %>% 
   # remove stopwords, if list for the relevant language is available, otherwise do nothing
@@ -218,13 +424,153 @@ colour <- dataset %>%
     n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
     n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
   )) %>% pull(colour)
-#sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*5)
-# graph <- dataset %>% 
-#   wordcloud2(size = sizeVar, color = colour)
-graph <- dataset %>% wordcloud2(color = colour, size = 2.2, shape = "star")
-filename <- file.path("img", paste(Sys.time(), "star wordcloud2 3months EN.png", sep = "-"))
-saveWidget(graph,"tmp.html",selfcontained = FALSE)
-webshot("tmp.html", filename, delay = 10, vwidth = 2048, vheight = 1512)
+sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*44)
 
-post_tweet(status = paste0("Three months of MEPs on Twitter, in a star. Explore the tweets also in other languages at https://www.europeandatajournalism.eu/Tools-for-journalists/Quote-Finder/"), media = filename, token = twitter_token)
+sizeVar <- min(1.8, sizeVar)
+
+graph <- dataset %>%
+  wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = sizeVar)
+filename <- file.path("img", paste(Sys.time(), "wordcloud2 1month hashtag", hashtag, "EN.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 20, vwidth = 2048, vheight = 1512)
+randomTopHashtag
+
+# Post tweet
+post_tweet(status = paste0("Here's one of the trending hashtags among MEPs tweeting in English this week: #", hashtag, ". Find out more at https://applications.europeandatajournalism.eu/quotefinder/"), media = filename, token = twitter_token)
+
+}
 ```
+
+
+
+```{r}
+if (selected == 13) {
+randomTopHashtag <- unlist(sample(head(trendingHashtags$it, 3), 1))
+NrOfTweets <- str_extract(string = randomTopHashtag, pattern = "([[:digit:]]+)")
+hashtag <- str_extract(string = randomTopHashtag, pattern = "([[:alnum:]]+)")
+dataset <- dataset %>% 
+  filter(lang=="it") %>% 
+  filter(purrr::map_lgl(.x = hashtags, .f = function (x) is.element(el = as.character(hashtag), set = x))) %>%
+    select(clean_text) %>% 
+  unnest_tokens(input = clean_text, output = word) %>% 
+  # remove stopwords, if list for the relevant language is available, otherwise do nothing
+  when(is.element(el = "it", set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
+         anti_join(., data_frame(word = stopwords::stopwords(language = "it", source = "stopwords-iso")), by = "word"),
+       ~ .) %>% 
+count(word, sort = TRUE)  
+# customise output color, gradients of blue by frequency
+colour <- dataset %>% 
+  mutate(colour = case_when(
+    n <= quantile(n)[1] ~ blues[1],
+    n > quantile(n)[1]& n<=quantile(n)[2] ~ blues[2],
+    n > quantile(n)[2]& n<=quantile(n)[3] ~ blues[3],
+    n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
+    n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
+  )) %>% pull(colour)
+sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*44)
+
+sizeVar <- min(1.8, sizeVar)
+
+graph <- dataset %>%
+  wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = sizeVar)
+filename <- file.path("img", paste(Sys.time(), "wordcloud2 1month hashtag", hashtag, "it.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 20, vwidth = 2048, vheight = 1512)
+randomTopHashtag
+
+# Post tweet
+post_tweet(status = paste0("Here's one of the trending hashtags among MEPs tweeting in Italian this week: #", hashtag, ". Find out more at https://applications.europeandatajournalism.eu/quotefinder/"), media = filename, token = twitter_token)
+
+}
+```
+
+
+
+```{r}
+if (selected == 14) {
+randomTopHashtag <- unlist(sample(head(trendingHashtags$de, 3), 1))
+NrOfTweets <- str_extract(string = randomTopHashtag, pattern = "([[:digit:]]+)")
+hashtag <- str_extract(string = randomTopHashtag, pattern = "([[:alnum:]]+)")
+dataset <- dataset %>% 
+  filter(lang=="de") %>% 
+  filter(purrr::map_lgl(.x = hashtags, .f = function (x) is.element(el = as.character(hashtag), set = x))) %>%
+    select(clean_text) %>% 
+  unnest_tokens(input = clean_text, output = word) %>% 
+  # remove stopwords, if list for the relevant language is available, otherwise do nothing
+  when(is.element(el = "de", set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
+         anti_join(., data_frame(word = stopwords::stopwords(language = "de", source = "stopwords-iso")), by = "word"),
+       ~ .) %>% 
+count(word, sort = TRUE)  
+# customise output color, gradients of blue by frequency
+colour <- dataset %>% 
+  mutate(colour = case_when(
+    n <= quantile(n)[1] ~ blues[1],
+    n > quantile(n)[1]& n<=quantile(n)[2] ~ blues[2],
+    n > quantile(n)[2]& n<=quantile(n)[3] ~ blues[3],
+    n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
+    n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
+  )) %>% pull(colour)
+sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*44)
+
+sizeVar <- min(1.8, sizeVar)
+
+graph <- dataset %>%
+  wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = sizeVar)
+filename <- file.path("img", paste(Sys.time(), "wordcloud2 1month hashtag", hashtag, "de.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 20, vwidth = 2048, vheight = 1512)
+randomTopHashtag
+
+# Post tweet
+post_tweet(status = paste0("Here's one of the trending hashtags among MEPs tweeting in German this week: #", hashtag, ". Find out more at https://applications.europeandatajournalism.eu/quotefinder/"), media = filename, token = twitter_token)
+
+}
+```
+
+
+
+```{r}
+if (selected == 15) {
+randomTopHashtag <- unlist(sample(head(trendingHashtags$fr, 3), 1))
+NrOfTweets <- str_extract(string = randomTopHashtag, pattern = "([[:digit:]]+)")
+hashtag <- str_extract(string = randomTopHashtag, pattern = "([[:alnum:]]+)")
+dataset <- dataset %>% 
+  filter(lang=="fr") %>% 
+  filter(purrr::map_lgl(.x = hashtags, .f = function (x) is.element(el = as.character(hashtag), set = x))) %>%
+    select(clean_text) %>% 
+  unnest_tokens(input = clean_text, output = word) %>% 
+  # remove stopwords, if list for the relevant language is available, otherwise do nothing
+  when(is.element(el = "fr", set = stopwords::stopwords_getlanguages(source = "stopwords-iso")) ~
+         anti_join(., data_frame(word = stopwords::stopwords(language = "fr", source = "stopwords-iso")), by = "word"),
+       ~ .) %>% 
+count(word, sort = TRUE)  
+# customise output color, gradients of blue by frequency
+colour <- dataset %>% 
+  mutate(colour = case_when(
+    n <= quantile(n)[1] ~ blues[1],
+    n > quantile(n)[1]& n<=quantile(n)[2] ~ blues[2],
+    n > quantile(n)[2]& n<=quantile(n)[3] ~ blues[3],
+    n > quantile(n)[3]& n<=quantile(n)[4] ~ blues[4],
+    n > quantile(n)[4]& n<=quantile(n)[5] ~ blues[4]
+  )) %>% pull(colour)
+sizeVar <- as.numeric(quantile(dataset$n)[5]/quantile(dataset$n)[1]/nrow(dataset)*44)
+
+sizeVar <- min(1.8, sizeVar)
+
+graph <- dataset %>%
+  wordcloud2(size = sizeVar, color = colour)
+graph <- dataset %>% wordcloud2(color = colour, size = sizeVar)
+filename <- file.path("img", paste(Sys.time(), "wordcloud2 1month hashtag", hashtag, "fr.png", sep = "-"))
+saveWidget(graph,"tmp.html",selfcontained = FALSE)
+webshot("tmp.html", filename, delay = 20, vwidth = 2048, vheight = 1512)
+randomTopHashtag
+
+# Post tweet
+post_tweet(status = paste0("Here's one of the trending hashtags among MEPs tweeting in French this week: #", hashtag, ". Find out more at https://applications.europeandatajournalism.eu/quotefinder/"), media = filename, token = twitter_token)
+
+}
+```
+

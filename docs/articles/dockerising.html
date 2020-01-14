@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">quotefinder</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9003</span>
       </span>
     </div>
 
@@ -57,7 +57,7 @@
       <a href="../articles/dockerising.html">Deploy with Docker</a>
     </li>
     <li>
-      <a href="../articles/edjnetquotefinder.html">quotefinder</a>
+      <a href="../articles/emm_newsbrief.html">Working with EMM newsbrief data</a>
     </li>
     <li>
       <a href="../articles/european_parliament.html">Getting information about Members of the European Parliament</a>
@@ -117,29 +117,29 @@
 </h1>
 <p>In order to check if everything is in order, you may want to have a look at your server in an interactive R session.</p>
 <p>Run this command if you prefer to keep files in your user directory on the server.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="fu">mkdir</span> qf_data</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="ex">docker</span> run --rm -p 28788:8787 -v <span class="va">$HOME</span>/qf_data:/home/qf/qf_data -e USER=qf -e PASSWORD=ies5EshaiPh6 --name qf_rstudio giocomai/qf_rstudio </a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" title="1"><span class="fu">mkdir</span> qf_data</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="ex">docker</span> run --rm -p 28788:8787 -v <span class="va">$HOME</span>/qf_data:/home/qf/qf_data -e USER=qf -e PASSWORD=ies5EshaiPh6 --name qf_rstudio giocomai/qf_rstudio </a></code></pre></div>
 <p>Or run this command to use Docker volumes</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="ex">docker</span> run --rm -p 28788:8787 -v qf_data:/home/qf/qf_data -e USER=qf -e PASSWORD=ies5EshaiPh6 --name qf_rstudio giocomai/qf_rstudio </a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" title="1"><span class="ex">docker</span> run --rm -p 28788:8787 -v qf_data:/home/qf/qf_data -e USER=qf -e PASSWORD=ies5EshaiPh6 --name qf_rstudio giocomai/qf_rstudio </a></code></pre></div>
 <p>N.B. keep qf as the user, but do change password! <code>ies5EshaiPh6</code> is just a random string. You can change the port where to make available Rstudio by changing the first part of <code>28788:8787</code> in the command above (add <code>-d</code> if you want this rstudio session to continue running). The Dockerfile used to create this image <a href="https://github.com/giocomai/quotefinder/blob/master/inst/qf_rstudio/Dockerfile">is available on GitHub</a>.</p>
 <p>You can then access the rstudio session using the ip (or the domain name) associated with your host, like <a href="http://123.123.123.123:28788" class="uri">http://123.123.123.123:28788</a></p>
 <p>In order to get some example files, you can download them to the <code>qf_data</code> folder by running these data in the newly opened Rstudio session in your browser.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="dt">url =</span> <span class="st">"https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/qf_get_tweets.R"</span>,</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">              <span class="dt">destfile =</span> <span class="st">"qf_data/qf_get_tweets.R"</span>)</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="kw"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="dt">url =</span> <span class="st">"https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/qf_get_tweets.Rmd"</span>,</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">              <span class="dt">destfile =</span> <span class="st">"qf_data/qf_get_tweets.Rmd"</span>)</a>
-<a class="sourceLine" id="cb3-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="kw"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="dt">url =</span> <span class="st">"https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/qf_pre_process_tweets.Rmd"</span>,</a>
-<a class="sourceLine" id="cb3-8" data-line-number="8">                <span class="dt">destfile =</span> <span class="st">"qf_data/qf_pre_process_tweets.Rmd"</span>)</a>
-<a class="sourceLine" id="cb3-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb3-10" data-line-number="10"><span class="kw"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="dt">url =</span> <span class="st">"https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/create_token.Rmd"</span>,</a>
-<a class="sourceLine" id="cb3-11" data-line-number="11">              <span class="dt">destfile =</span> <span class="st">"qf_data/create_token.Rmd"</span>)</a></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="../reference/qf_get_tweets_from_list.html">qf_get_tweets_from_list</a></span>(<span class="dt">slug =</span> <span class="st">"current-meps"</span>,</a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">                        <span class="dt">owner_user =</span> <span class="st">"EDJQuoteFinder"</span>,</a>
-<a class="sourceLine" id="cb4-3" data-line-number="3">                        <span class="dt">n =</span> <span class="dv">32</span>,</a>
-<a class="sourceLine" id="cb4-4" data-line-number="4">                        <span class="dt">include_rts =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb4-5" data-line-number="5">                        <span class="dt">twitter_token =</span> twitter_token)</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="dt">url =</span> <span class="st">"https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/qf_get_tweets.R"</span>,</a>
+<a class="sourceLine" id="cb3-2" title="2">              <span class="dt">destfile =</span> <span class="st">"qf_data/qf_get_tweets.R"</span>)</a>
+<a class="sourceLine" id="cb3-3" title="3"></a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="kw"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="dt">url =</span> <span class="st">"https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/qf_get_tweets.Rmd"</span>,</a>
+<a class="sourceLine" id="cb3-5" title="5">              <span class="dt">destfile =</span> <span class="st">"qf_data/qf_get_tweets.Rmd"</span>)</a>
+<a class="sourceLine" id="cb3-6" title="6"></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="kw"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="dt">url =</span> <span class="st">"https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/qf_pre_process_tweets.Rmd"</span>,</a>
+<a class="sourceLine" id="cb3-8" title="8">                <span class="dt">destfile =</span> <span class="st">"qf_data/qf_pre_process_tweets.Rmd"</span>)</a>
+<a class="sourceLine" id="cb3-9" title="9"></a>
+<a class="sourceLine" id="cb3-10" title="10"><span class="kw"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="dt">url =</span> <span class="st">"https://raw.githubusercontent.com/giocomai/quotefinder/master/inst/qf_get_tweets/qf_data/create_token.Rmd"</span>,</a>
+<a class="sourceLine" id="cb3-11" title="11">              <span class="dt">destfile =</span> <span class="st">"qf_data/create_token.Rmd"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw"><a href="../reference/qf_get_tweets_from_list.html">qf_get_tweets_from_list</a></span>(<span class="dt">slug =</span> <span class="st">"current-meps"</span>,</a>
+<a class="sourceLine" id="cb4-2" title="2">                        <span class="dt">owner_user =</span> <span class="st">"EDJQuoteFinder"</span>,</a>
+<a class="sourceLine" id="cb4-3" title="3">                        <span class="dt">n =</span> <span class="dv">32</span>,</a>
+<a class="sourceLine" id="cb4-4" title="4">                        <span class="dt">include_rts =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb4-5" title="5">                        <span class="dt">twitter_token =</span> twitter_token)</a></code></pre></div>
 <p>If you already have a twitter token, you can copy it to the <code>qf_data</code> subfolder as <code>twitter_token.rds</code>. If not, now it’s the right time to create one. You can do so by opening the <code>create_token.Rmd</code> file that you should find in the <code>qf_data</code> folder.</p>
 <p>At this stage, you can customise the <code>qf_get_tweets.Rmd</code> to download the tweets you are interested in.</p>
 <p>Running the command in <code>qf_get_tweets.R</code> should process the rmarkdown file and store tweets locally.</p>
@@ -150,23 +150,22 @@
 <a href="#have-tweets-updated-regularly-with-cron" class="anchor"></a>Have tweets updated regularly with cron</h1>
 <p>While in principle it is possible to have a constantly running docker container, with cron running inside it, it is more advisable (and more efficient) to let the host machine handle the cron part, and start up the relevant docker container, have it update tweets, and then stop immediately.</p>
 <p>First, let’s run the docker container tasked with updating tweets in an interactive session to check again if everything is running smoothly.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="ex">docker</span> run --rm -v <span class="va">$HOME</span>/qf_data:/home/qf/qf_data giocomai/qf_get_tweets</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb5-1" title="1"><span class="ex">docker</span> run --rm -v <span class="va">$HOME</span>/qf_data:/home/qf/qf_data giocomai/qf_get_tweets</a></code></pre></div>
 <p>All good? What about having the host updating tweets every hour?</p>
 <p>From the terminal on your host, run:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb6-1" data-line-number="1"></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="ex">crontab</span> -e</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb6-1" title="1"></a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="ex">crontab</span> -e</a></code></pre></div>
 <p>At the end of the document, add:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="ex">0</span> * * * * docker run --rm -v <span class="va">$HOME</span>/qf_data:/home/qf/qf_data giocomai/qf_get_tweets</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb7-1" title="1"><span class="ex">0</span> * * * * docker run --rm -v <span class="va">$HOME</span>/qf_data:/home/qf/qf_data giocomai/qf_get_tweets</a></code></pre></div>
 <p>or, if you want to have a logfile for troubleshooting:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="ex">0</span> * * * * docker run --rm -v <span class="va">$HOME</span>/qf_data:/home/qf/qf_data giocomai/qf_get_tweets <span class="op">&gt;&gt;</span> <span class="va">$HOME</span>/qf_data/qf_get_tweets.log <span class="op">2&gt;&amp;1</span></a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb8-1" title="1"><span class="ex">0</span> * * * * docker run --rm -v <span class="va">$HOME</span>/qf_data:/home/qf/qf_data giocomai/qf_get_tweets <span class="op">&gt;&gt;</span> <span class="va">$HOME</span>/qf_data/qf_get_tweets.log <span class="op">2&gt;&amp;1</span></a></code></pre></div>
 <p>Leave an empty line at the end the crontab, save, and… you’re done. This will update tweets every time an hour starts (e.g. at 8.00, at 9.00, etc.).</p>
 <p>If you are unfamiliar with cron, in order to customise frequency and time consider using <a href="https://github.com/bnosac/cronR"><code>cronR</code></a>.</p>
+<div id="add-emm-newsbrief" class="section level2">
+<h2 class="hasAnchor">
+<a href="#add-emm-newsbrief" class="anchor"></a>Add EMM newsbrief</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb9-1" title="1"><span class="ex">0</span> * * * * docker run --rm -v <span class="va">$HOME</span>/qf_data:/home/qf/qf_data giocomai/qf_get_emm_newsbrief:latest <span class="op">&gt;&gt;</span> <span class="va">$HOME</span>/qf_data/qf_get_emm_newsbrief.log <span class="op">2&gt;&amp;1</span></a></code></pre></div>
 </div>
-<div id="run-the-app" class="section level1">
-<h1 class="hasAnchor">
-<a href="#run-the-app" class="anchor"></a>Run the app</h1>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(quotefinder)</a></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">golem<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/golem/man/dockerfiles.html">add_dockerfile</a></span>()</a></code></pre></div>
 </div>
   </div>
 
@@ -178,8 +177,11 @@
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#getting-the-tweets">Getting the tweets</a></li>
       <li><a href="#dockerised-rstudio-with-pre-loaded-quotefinder">Dockerised Rstudio with pre-loaded <code>quotefinder</code></a></li>
-      <li><a href="#have-tweets-updated-regularly-with-cron">Have tweets updated regularly with cron</a></li>
-      <li><a href="#run-the-app">Run the app</a></li>
+      <li>
+<a href="#have-tweets-updated-regularly-with-cron">Have tweets updated regularly with cron</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#add-emm-newsbrief">Add EMM newsbrief</a></li>
+      </ul>
+</li>
       </ul>
 </div>
       </div>

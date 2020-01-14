@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">quotefinder</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9003</span>
       </span>
     </div>
 
@@ -95,7 +95,7 @@
       <a href="../articles/dockerising.html">Deploy with Docker</a>
     </li>
     <li>
-      <a href="../articles/edjnetquotefinder.html">quotefinder</a>
+      <a href="../articles/emm_newsbrief.html">Working with EMM newsbrief data</a>
     </li>
     <li>
       <a href="../articles/european_parliament.html">Getting information about Members of the European Parliament</a>
@@ -135,8 +135,13 @@
     <p>Extracts and stores tweets locally</p>
     </div>
 
-    <pre class="usage"><span class='fu'>qf_get_tweets_by_user</span>(<span class='no'>users</span>, <span class='kw'>wait</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>cache_id</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>twitter_token</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>qf_get_tweets_by_user</span>(
+  <span class='no'>users</span>,
+  <span class='kw'>wait</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>cache_id</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>twitter_token</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">

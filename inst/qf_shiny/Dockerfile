@@ -84,7 +84,7 @@ RUN R -e 'remotes::install_cran("shinybusy")'
 RUN R -e 'remotes::install_cran("billboarder")'
 
 RUN R -e 'remotes::install_github(repo = "giocomai/castarter")'
-RUN R -e ' remotes::install_github(repo = "edjnet/quotefinder")'
+RUN R -e '  remotes::install_github(repo = "edjnet/quotefinder")'
 
 # add .conf file to image/container to preserve log file
 COPY  shiny-server.conf  /etc/shiny-server/shiny-server.conf
