@@ -257,7 +257,7 @@ app_ui <- function() {
                                                                 ),
                                                                 shiny::textAreaInput(inputId = 'wordcloud_eu_castarter_custom_stopwords',
                                                                                      label = 'Words to remove from wordcloud',
-                                                                                     value = "eu, european, commission, union, europe")),
+                                                                                     value = "eu, european, commission, union, europe, president, council, parliament, minister")),
                                                   shiny::column(width = 9, 
                                                                 wordcloud2Output("wordcloud2_eu_castarter")))
                                   
