@@ -196,7 +196,7 @@ qf_create_trending_hashtag_list <- function() {
     if(nrow(currentDatasetPre)>0) {
       tempL <- currentDatasetPre %>% 
         dplyr::select(date, hashtags) %>% 
-        tidyr::unnest() %>% 
+        tidyr::unnest(cols = c(hashtags)) %>% 
         dplyr::mutate(hashtags = tolower(hashtags)) %>% 
         dplyr::mutate(NewOld = dplyr::if_else(condition = date>as.Date(Sys.Date()-8),
                                               true = "New",
@@ -208,7 +208,7 @@ qf_create_trending_hashtag_list <- function() {
       
       currentHashtagsDF <- currentDatasetPre %>%
         dplyr::select(screen_name, hashtags) %>%
-        tidyr::unnest() %>%
+        tidyr::unnest(cols = c(hashtags)) %>%
         na.omit() %>% 
         dplyr::group_by(hashtags) %>%
         dplyr::add_count(sort = TRUE) %>% 
@@ -253,7 +253,7 @@ qf_create_trending_hashtag_list <- function() {
   currentHashtagsDF <-  tweets_all %>% 
     dplyr::filter(is.na(hashtags)==FALSE) %>%
     dplyr::select(screen_name, hashtags) %>%
-    tidyr::unnest() %>%
+    tidyr::unnest(cols = c(hashtags)) %>%
     na.omit() %>% 
     dplyr::group_by(hashtags) %>%
     dplyr::add_count(sort = TRUE) %>% 
@@ -277,7 +277,7 @@ qf_create_trending_hashtag_list <- function() {
     tweets_all %>% 
     dplyr::filter(is.na(hashtags)==FALSE) %>% 
     dplyr::select(date, hashtags) %>% 
-    tidyr::unnest() %>% 
+    tidyr::unnest(cols = c(hashtags)) %>% 
     dplyr::mutate(hashtags = tolower(hashtags)) %>% 
     dplyr::mutate(NewOld = dplyr::if_else(condition = date>as.Date(Sys.Date()-8),
                                           true = "New", false = "Old")) %>% 
@@ -290,7 +290,8 @@ qf_create_trending_hashtag_list <- function() {
     dplyr::transmute(hashtags, NewLog = logratio) 
   
   temptrending_hashtags <- dplyr::left_join(temptrending_hashtags, 
-                                            currentHashtagsDF %>% dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
+                                            currentHashtagsDF %>%
+                                              dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
                                             by = "hashtags") %>% 
     dplyr::arrange(dplyr::desc(NewLog*nMepPerHashtag)) %>% 
     head(10) %>% 
