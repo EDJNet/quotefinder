@@ -233,14 +233,16 @@ qf_create_trending_hashtag_list <- function() {
       
       if (ncol(tempL)==3) {
         tempL <- tempL %>% 
-          dplyr::mutate_if(is.numeric, dplyr::funs((. + 1) / sum(. + 1))) %>%
+          dplyr::mutate(New = ((New + 1) / sum(New + 1)),
+                        Old = ((Old + 1) / sum(Old + 1))) %>%
           dplyr::mutate(logratio = log(New / Old)) %>%
           dplyr::arrange(dplyr::desc(logratio)) %>% 
           dplyr::transmute(hashtags, NewLog = logratio) %>% 
           head(200) 
         
         tempL <- dplyr::left_join(tempL, 
-                                  currentHashtagsDF %>% dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
+                                  currentHashtagsDF %>%
+                                    dplyr::transmute(hashtags = hashtagsLower, nMepPerHashtag),
                                   by = "hashtags") %>% 
           dplyr::arrange(dplyr::desc(NewLog*nMepPerHashtag)) %>% 
           head(10) %>% 
@@ -284,7 +286,8 @@ qf_create_trending_hashtag_list <- function() {
     dplyr::count(hashtags, NewOld) %>% 
     dplyr::ungroup() %>%
     tidyr::spread(NewOld, n, fill = 0) %>%
-    dplyr::mutate_if(is.numeric, dplyr::funs((. + 1) / sum(. + 1))) %>%
+    dplyr::mutate(New = ((New + 1) / sum(New + 1)),
+                  Old = ((Old + 1) / sum(Old + 1)))  %>%
     dplyr::mutate(logratio = log(New / Old)) %>%
     dplyr::arrange(dplyr::desc(logratio)) %>% 
     dplyr::transmute(hashtags, NewLog = logratio) 
