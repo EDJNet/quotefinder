@@ -114,7 +114,7 @@ qf_create_language_list <- function() {
   lang_list <- as.list(lang$lang)
   fs::dir_create(path = "tweets_processed")
   readr::write_rds(x = lang_list,
-                   path = fs::path("tweets_processed", "tweets_lang_list.rds"))  
+                   fs::path("tweets_processed", "tweets_lang_list.rds"))  
   message(paste("\nOrdered language list has been saved in ", sQuote(fs::path("tweets_processed", "tweets_lang_list.rds"))))
 }
 
@@ -139,11 +139,10 @@ qf_create_hashtag_list <- function() {
       dplyr::count(hashtags, sort = TRUE) %>% # make hashtags in order of most frequent, by language
       dplyr::mutate(hashtagsLower = tolower(hashtags)) %>% # ignore case, but keep the case of the most frequently found case combination
       dplyr::group_by(hashtagsLower) %>%
-      dplyr::add_tally(wt = n) %>%
+      dplyr::add_tally(wt = n, name = "nn") %>%
       dplyr::distinct(hashtagsLower, .keep_all = TRUE) %>%
-      dplyr::arrange(desc(n)) %>% 
+      dplyr::arrange(desc(nn)) %>% 
       dplyr::ungroup() %>%
-      dplyr::select(hashtags) %>% 
       dplyr::pull(hashtags) %>%
       as.list()
     if (length(tempL) == 0) {
@@ -161,17 +160,18 @@ qf_create_hashtag_list <- function() {
     dplyr::count(hashtags, sort = TRUE) %>% # make hashtags in order of most frequent, by language
     dplyr::mutate(hashtagsLower = tolower(hashtags)) %>% # ignore case, but keep the case of the most frequently found case combination
     dplyr::group_by(hashtagsLower) %>%
-    dplyr::add_tally(wt = n) %>%
+    dplyr::add_tally(wt = n, name = "nn") %>%
     dplyr::distinct(hashtagsLower, .keep_all = TRUE) %>%
-    dplyr::arrange(dplyr::desc(n)) %>% 
+    dplyr::arrange(dplyr::desc(nn)) %>% 
     dplyr::ungroup() %>%
-    dplyr::select(hashtags) %>% 
     dplyr::pull(hashtags) %>%
     as.list()
   names(hashtagsAnyLanguage) <- paste0("#", unlist(hashtagsAnyLanguage))
   hashtags$AnyLanguage <- hashtagsAnyLanguage
-  readr::write_rds(x = hashtags, path = fs::path("tweets_processed", "tweets_hashtags_list.rds"))
-  message(paste("\nOrdered hashtag list has been saved in ", sQuote(fs::path("tweets_processed", "tweets_hashtags_list.rds"))))
+  readr::write_rds(x = hashtags,
+                   fs::path("tweets_processed", "tweets_hashtags_list.rds"))
+  message(paste("\nOrdered hashtag list has been saved in ",
+                sQuote(fs::path("tweets_processed", "tweets_hashtags_list.rds"))))
 }
 
 
@@ -305,5 +305,5 @@ qf_create_trending_hashtag_list <- function(recent_days = 7) {
   trending_hashtags$AnyLanguage <- paste0("#", as.character(hashtags$AnyLanguage)[is.element(el = tolower(as.character(hashtags$AnyLanguage)), set = temptrending_hashtags)])
   
   readr::write_rds(x = trending_hashtags,
-                   path = fs::path("tweets_processed", "tweets_trending_hashtags_list.rds"))
+                   fs::path("tweets_processed", "tweets_trending_hashtags_list.rds"))
 }
