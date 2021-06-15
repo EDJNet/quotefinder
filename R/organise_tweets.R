@@ -283,7 +283,7 @@ qf_create_trending_hashtag_list <- function(recent_days = 7) {
     dplyr::select(date, hashtags) %>% 
     tidyr::unnest(cols = c(hashtags)) %>% 
     dplyr::mutate(hashtags = tolower(hashtags)) %>% 
-    dplyr::mutate(NewOld = dplyr::if_else(condition = date>as.Date(Sys.Date()-8),
+    dplyr::mutate(NewOld = dplyr::if_else(condition = date>=as.Date(Sys.Date()-recent_days),
                                           true = "New", false = "Old")) %>% 
     dplyr::count(hashtags, NewOld) %>% 
     dplyr::ungroup() %>%
