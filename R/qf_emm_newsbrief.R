@@ -65,7 +65,13 @@ qf_get_emm_newsbrief <- function(languages = "all",
       for (j in 1:nrows_rss) {
         temp <- xml2_list %>% magrittr::extract2(j)
         
-        rss_df$title[j] <- temp$title %>% as.character()
+        current_title <- temp$title %>% as.character()
+        
+        if (length(current_title)==0) {
+          current_title <- ""
+        }
+        
+        rss_df$title[j] <- current_title
         rss_df$language[j] <- temp$language %>% as.character()
         rss_df$link[j] <- temp$link %>% as.character()
         rss_df$description[j] <- temp$description %>% as.character()
