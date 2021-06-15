@@ -4,7 +4,10 @@
 \alias{qf_create_trending_hashtag_list}
 \title{Create an ordered list of hashtags (tipically, to be used in a shiny app)}
 \usage{
-qf_create_trending_hashtag_list()
+qf_create_trending_hashtag_list(recent_days = 7)
+}
+\arguments{
+\item{recent_days}{Defaults to 7. Tweets posted within the given number of days will be considered "recent", and trending hashtags will be chosen based on relative popularity compared with older tweets.}
 }
 \description{
 Create an ordered list of hashtags (tipically, to be used in a shiny app)

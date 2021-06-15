@@ -19,7 +19,7 @@ Imports:
     readr,
     tidytext,
     xml2
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 URL: https://github.com/edjnet/quotefinder
 BugReports: https://github.com/edjnet/quotefinder/issues
 Suggests:
