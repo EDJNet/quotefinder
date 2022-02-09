@@ -111,7 +111,7 @@ qf_get_emm_newsbrief <- function(languages = "en",
             dplyr::pull(path)
            if (length(link_to_previous)>0) {
              for (k in 1:102) {
-               previous <- readr::read_rds(path = fs::dir_info(path = fs::path("emm_newsbrief", i),
+               previous <- readr::read_rds(file = fs::dir_info(path = fs::path("emm_newsbrief", i),
                                                                recurse = TRUE,
                                                                glob = "*.rds") %>% 
                                              dplyr::arrange(dplyr::desc(modification_time)) %>% 

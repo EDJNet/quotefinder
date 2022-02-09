@@ -231,7 +231,7 @@ write_rds(x = qf_twitter_list, path = "qf_twitter_list.rds")
 # Have all these data together
 
 ```{r}
-qf_twitter_list <- readr::read_rds(path = "qf_twitter_list.rds")
+qf_twitter_list <- readr::read_rds(file = "qf_twitter_list.rds")
 
 all_MEPs_eliflab <- read_csv(file = "https://raw.githubusercontent.com/giocomai/European-Parliament-Open-Data/master/meps_full_list_with_twitter_accounts.csv") %>% 
   select(NAME, TWITTER_URL, SCREEN_NAME) %>% 

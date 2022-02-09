@@ -19,7 +19,7 @@ qf_get_tweets_by_user <- function(users,
     if (cache_id==TRUE) {
       fs::dir_create(path = "users_id")
       if (fs::file_exists(fs::path("users_id", "users_id.rds"))==TRUE) {
-        users_df <- readr::read_rds(path = fs::path("users_id", "users_id.rds"))
+        users_df <- readr::read_rds(file = fs::path("users_id", "users_id.rds"))
         users_available_l <- is.element(el = users, set = users_df$screen_name)
         if (sum(users_available_l)<length(users_available_l)) {
           users_df_new <- rtweet::lookup_users(users = users[!users_available_l],

@@ -50,7 +50,7 @@ all_MEPs_full <- readr::read_csv(file = "all_MEPs_full.csv")
 
 
 ```{r}
-all_MEPs_tweets_df <- readr::read_rds(path = fs::path("tweets_processed", "tweets_all.rds")) %>% 
+all_MEPs_tweets_df <- readr::read_rds(file = fs::path("tweets_processed", "tweets_all.rds")) %>% 
   dplyr::arrange(dplyr::desc(created_at)) %>%
   dplyr::rename(time = created_at) %>% 
   dplyr::mutate(user_id = as.numeric(user_id)) %>% 
