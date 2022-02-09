@@ -214,6 +214,7 @@ qf_emm_extract_keywords <- function(language = NULL,
                                              pattern = "[[:digit:]]")) %>%  # togliere i numeri registrati come parole
           dplyr::group_by(words) %>% 
           dplyr::count(sort = TRUE) %>% 
+          dplyr::ungroup() %>% 
           head(n) 
         
         if (store==TRUE) {
@@ -233,7 +234,7 @@ qf_emm_extract_keywords <- function(language = NULL,
       }
     }
   }
-  invisible(keywords)
+  keywords
 }
 
 
@@ -313,4 +314,5 @@ qf_emm_extract_entities <- function(language = NULL,
     dplyr::count(sort = TRUE) %>% 
     dplyr::ungroup() %>% 
     head(n) 
+  entities
 }
