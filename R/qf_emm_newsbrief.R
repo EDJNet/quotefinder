@@ -1,19 +1,30 @@
 #' Get current news in multiple languages from EMM newsbrief
-#' 
+#'
 #' Imports and cleans RSS files from [http://emm.newsbrief.eu/]
 #'
-#' @param languages A character vector of one or more languages as two letter codes (e.g. "en"). "all", the dafault, includes all available languages. Current available languages are: `c("ar","bg","cs","da","de","el","en","es", "et","fi","fr","hr", "hu","it", "lt","lv","nl","pl","pt","ro","ru", "sk","sl","sv","sw","tr","zh")`
-#' @param category_id A character vector of length 1, defaults to "rtn" (default category with all contents). The id for separate categories can be derived from the URL of the given section, e.g. for EC news the id is "ECnews".
-#' @param shuffle Logical, defaults to TRUE. If TRUE, order in which languages are processed is randomised.
-#' @param keep_xml Logical, defaults to FALSE. If TRUE, removes the xml file downloaded from EMM newsbrief.
-#' @param store Logical, defaults to TRUE. If TRUE, it stores the data extracted from the xml as an rds file in a local subfolder, organised by language and date.
-#' @param store_only_new Logical, defaults to TRUE. Before storing outputs, it checks the previous file and keeps only articles published after the most recent article incldued in the previous post.
-#' @return Nothing, used for its side effects. 
+#' @param languages A character vector of one or more languages as two letter
+#'   codes (e.g. "en"). Defaults to "en", as the previous default, "all", is not
+#'   any more available. Current available languages are:
+#'   `c("ar","bg","cs","da","de","el","en","es", "et","fi","fr","hr", "hu","it",
+#'   "lt","lv","nl","pl","pt","ro","ru", "sk","sl","sv","sw","tr","zh")`
+#' @param category_id A character vector of length 1, defaults to "rtn" (default
+#'   category with all contents). The id for separate categories can be derived
+#'   from the URL of the given section, e.g. for EC news the id is "ECnews".
+#' @param shuffle Logical, defaults to TRUE. If TRUE, order in which languages
+#'   are processed is randomised.
+#' @param keep_xml Logical, defaults to FALSE. If TRUE, removes the xml file
+#'   downloaded from EMM newsbrief.
+#' @param store Logical, defaults to TRUE. If TRUE, it stores the data extracted
+#'   from the xml as an rds file in a local subfolder, organised by language and
+#'   date.
+#' @param store_only_new Logical, defaults to TRUE. Before storing outputs, it
+#'   checks the previous file and keeps only articles published after the most
+#'   recent article incldued in the previous post.
+#' @return Nothing, used for its side effects.
 #' @examples
-#' 
+#'
 #' @export
-
-qf_get_emm_newsbrief <- function(languages = "all",
+qf_get_emm_newsbrief <- function(languages = "en",
                                  category_id = "rtn",
                                  keep_xml = TRUE,
                                  shuffle = TRUE,
@@ -29,6 +40,7 @@ qf_get_emm_newsbrief <- function(languages = "all",
     base_path <- fs::path("emm_newsbrief", 
                           i,
                           as.character(Sys.Date()))
+    
     fs::dir_create(path = base_path, recurse = TRUE)
 
     
@@ -36,13 +48,13 @@ qf_get_emm_newsbrief <- function(languages = "all",
       xml_location <- fs::path(base_path,
                                paste0(Sys.time(), "-emm_rtn_", i, ".xml"))
       
-      download.file(url = paste0("http://emm.newsbrief.eu/rss/rss?type=rtn&language=", i, "&duplicates=false"),
+      download.file(url = paste0("https://emm.newsbrief.eu/rss/rss?type=rtn&language=", i, "&duplicates=false"),
                     destfile = xml_location)
       
     } else {
       xml_location <- fs::path(base_path,
                                paste0(Sys.time(), "-", category_id, "-", i, ".xml"))
-      download.file(url = paste0("https://emm.newsbrief.eu/rss/rss?type=category&id=",category_id, "&language=", i, "&duplicates=false"),
+      download.file(url = paste0("https://emm.newsbrief.eu/rss/rss?type=category&id=", category_id, "&language=", i, "&duplicates=false"),
                     destfile = xml_location)
     }
 
@@ -57,7 +69,7 @@ qf_get_emm_newsbrief <- function(languages = "all",
       rss_df <- tibble::tibble(title = character(nrows_rss),
                                language = character(nrows_rss),
                                link = character(nrows_rss),
-                               description = character(nrows_rss),
+                               keywords = character(nrows_rss),
                                pubDate = as.POSIXct(x = rep(x = NA, nrows_rss)),
                                source = character(nrows_rss), 
                                entity = list(nrows_rss))
@@ -74,7 +86,8 @@ qf_get_emm_newsbrief <- function(languages = "all",
         rss_df$title[j] <- current_title
         rss_df$language[j] <- temp$language %>% as.character()
         rss_df$link[j] <- temp$link %>% as.character()
-        rss_df$description[j] <- temp$description %>% as.character()
+        rss_df$keywords[j] <- temp$keywords %>% as.character()
+       # rss_df$description[j] <- temp$description %>% as.character()
         rss_df$pubDate[j] <- temp$pubDate %>% as.character() %>% base::strptime("%a, %d %b %Y %H:%M:%S %z")
         rss_df$source[j] <- temp$source %>% as.character()
         entL <- temp[names(temp)=="entity"] 
@@ -143,19 +156,24 @@ qf_get_emm_newsbrief <- function(languages = "all",
   }
 }
 
-#' Extract most frequently used words from news titles 
+#' Extract most frequently used words from news titles
 #'
-#' @param language A character vector of language two letter codes. Defaults to NULL. If NULL, processes available languages.
-#' @param n An integer. Number of words to keep. Defaults to `Inf` (i.e. keeps all words, ordered by frequency).
-#' @param date Only news downloaded in the given date will be considered. Defaults to current day. To get data for the previous day, use `Sys.Date()-1` 
-#' @return A data.frame (a tibble) with `n` number of rows and two columns, `words` and `n` for number of occurrences.
+#' @param language A character vector of language two letter codes. Defaults to
+#'   NULL. If NULL, processes available languages.
+#' @param n An integer. Number of words to keep. Defaults to `Inf` (i.e. keeps
+#'   all words, ordered by frequency).
+#' @param date Only news downloaded in the given date will be considered.
+#'   Defaults to current day. To get data for the previous day, use
+#'   `Sys.Date()-1`
+#' @return A data.frame (a tibble) with `n` number of rows and two columns,
+#'   `words` and `n` for number of occurrences.
 #' @examples
-#' 
+#'
 #' @export
 qf_emm_extract_keywords <- function(language = NULL,
-                                date = NULL,
-                                n = Inf,
-                                store = TRUE) {
+                                    date = NULL,
+                                    n = Inf,
+                                    store = TRUE) {
   
   if (is.null(language)) {
     language <-  fs::dir_ls(path = fs::path("emm_newsbrief"),

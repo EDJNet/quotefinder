@@ -7,14 +7,19 @@
 qf_emm_extract_keywords(language = NULL, date = NULL, n = Inf, store = TRUE)
 }
 \arguments{
-\item{language}{A character vector of language two letter codes. Defaults to NULL. If NULL, processes available languages.}
+\item{language}{A character vector of language two letter codes. Defaults to
+NULL. If NULL, processes available languages.}
 
-\item{date}{Only news downloaded in the given date will be considered. Defaults to current day. To get data for the previous day, use `Sys.Date()-1`}
+\item{date}{Only news downloaded in the given date will be considered.
+Defaults to current day. To get data for the previous day, use
+`Sys.Date()-1`}
 
-\item{n}{An integer. Number of words to keep. Defaults to `Inf` (i.e. keeps all words, ordered by frequency).}
+\item{n}{An integer. Number of words to keep. Defaults to `Inf` (i.e. keeps
+all words, ordered by frequency).}
 }
 \value{
-A data.frame (a tibble) with `n` number of rows and two columns, `words` and `n` for number of occurrences.
+A data.frame (a tibble) with `n` number of rows and two columns,
+  `words` and `n` for number of occurrences.
 }
 \description{
 Extract most frequently used words from news titles
