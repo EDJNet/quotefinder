@@ -1,6 +1,6 @@
 Package: quotefinder
 Title: EDJNet's QuoteFinder
-Version: 0.0.0.9003
+Version: 0.0.0.9004
 Authors@R: person('Giorgio', 'Comai', email = 'g@giorgiocomai.eu', role = c('cre', 'aut'))
 Description: EDJNet's QuoteFinder. Facilitates finding different takes on European affairs.
 License: GPL-3
